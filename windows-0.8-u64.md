@@ -209,3 +209,169 @@ signed int __cdecl sub_451FB7()
   return result;
 }
 ```
+
+ÈË»°°æ
+
+```
+
+  [[Æ«ÒÆ1924 4×Ö½Ú]] = 541283667;
+  i = 0;
+  len = 0;
+  Src = 0;
+  LOBYTE([316]) = (unsigned __int8)byte_551164 % 155 + 100;
+  if ( *((_DWORD *)dword_54903C + 3) < 203 )
+  {
+    sub_4412E2((unsigned int *)::Src + 9);
+    sub_441098();
+    sub_441860(7);
+    memset(&[[Æ«ÒÆ0 1×Ö½Ú]], 0, 0x138u);
+    for ( i = 1; i < *((_DWORD *)dword_54903C + 116); ++i )
+    {
+      if ( *((_DWORD *)dword_54903C + i + 117) == *((_DWORD *)dword_54903C + 51) )
+      {
+        *((_DWORD *)dword_54903C + i + 117) = *((_DWORD *)dword_54903C + 117);
+        *((_DWORD *)dword_54903C + 117) = *((_DWORD *)dword_54903C + 51);
+        break;
+      }
+    }
+    if ( *((_DWORD *)dword_54903C + 117) != *((_DWORD *)dword_54903C + 51) )
+      *((_DWORD *)dword_54903C + 117) = *((_DWORD *)dword_54903C + 51);
+    *((_DWORD *)dword_54903C + 135) = GetTickCount();
+    memset(&buf, 0, 0x640u);
+    buf = 3;
+    [325] = 1;
+    [[Æ«ÒÆ-4 4×Ö½Ú]] = strlen((const char *)::Src + 36);
+    if ( [[Æ«ÒÆ-4 4×Ö½Ú]] > 16 )
+      [[Æ«ÒÆ-4 4×Ö½Ú]] = 16;
+    memcpy(&Dst, (char *)dword_54903C + 164, 4u);
+    memcpy(&[[Æ«ÒÆ330 14×Ö½Ú]], (char *)::Src + 36, [[Æ«ÒÆ-4 4×Ö½Ú]]);
+    len = [[Æ«ÒÆ-4 4×Ö½Ú]] + 6;
+    Src = sub_446840(&buf, [[Æ«ÒÆ-4 4×Ö½Ú]] + 6);
+    memcpy((char *)dword_54903C + 128, Src, 0x10u);
+    [[Æ«ÒÆ0 1×Ö½Ú]] = 3;
+    [[Æ«ÒÆ1 1×Ö½Ú]] = 1;
+    [[Æ«ÒÆ2 1×Ö½Ú]] = 0;
+    [3] = strlen((const char *)::Src) + 20;
+    memcpy(v15, (char *)dword_54903C + 128, 0x10u);
+    memcpy(&[20], ::Src, 0x24u);
+    v17[0] = *((_BYTE *)dword_54903C + 562);
+    v1 = sub_438787((int)dword_54903C);
+    sub_438787(v1);
+    sub_438787((int)dword_54903C);
+    v17[1] = *((_BYTE *)dword_54903C + 161);
+    for ( i = 0; i < 6; ++i )
+      v17[i + 2] = *((_BYTE *)dword_54903C + i + 128) ^ *((_BYTE *)dword_54903C + i + 232);
+    memset(&buf, 0, 0x640u);
+    buf = 1;
+    memcpy(&[325], (char *)::Src + 36, [[Æ«ÒÆ-4 4×Ö½Ú]]);
+    memcpy(&[325] + [[Æ«ÒÆ-4 4×Ö½Ú]], (char *)dword_54903C + 164, 4u);
+    len = [[Æ«ÒÆ-4 4×Ö½Ú]] + 9;
+    Src = sub_446840(&buf, [[Æ«ÒÆ-4 4×Ö½Ú]] + 9);
+    memcpy(&[[Æ«ÒÆ64 16×Ö½Ú]], Src, 0x10u);
+    [[Æ«ÒÆ80 1×Ö½Ú]] = *((_BYTE *)dword_54903C + 464);
+    memcpy(&[[Æ«ÒÆ81 16×Ö½Ú]], (char *)dword_54903C + 468, 0x10u);
+    [[Æ«ÒÆ97 1×Ö½Ú]] = 20;
+    [[Æ«ÒÆ98 1×Ö½Ú]] = 0;
+    [[Æ«ÒÆ99 1×Ö½Ú]] = 7;
+    [[Æ«ÒÆ100 5×Ö½Ú]] = 11;
+    len = 101;
+    Src = sub_446840(&[[Æ«ÒÆ0 1×Ö½Ú]], 0x65u);
+    memcpy(&[[Æ«ÒÆ97 1×Ö½Ú]], Src, 8u);
+    [[Æ«ÒÆ106 4×Ö½Ú]] = 0;
+    memcpy(&[[Æ«ÒÆ110 200×Ö½Ú]], (char *)dword_54903C + 264, 0xC8u);
+    if ( *((_DWORD *)::Dst + 49) == 4 )
+    {
+      if ( sub_441860(7) == 541283667 )
+      {
+        [[Æ«ÒÆ105 1×Ö½Ú]] = 1;
+        sub_438787(541283667);
+      }
+      else
+      {
+        LOBYTE([316]) = 2;
+      }
+    }
+    if ( *((_DWORD *)::Dst + 49) == 1 || *((_DWORD *)::Dst + 49) == 8 || *((_DWORD *)::Dst + 49) == 2 )
+    {
+      if ( sub_4458F3() )
+      {
+        [[Æ«ÒÆ105 1×Ö½Ú]] = 1;
+        [311] = 32 * (dword_549FA4 & 7) + ((dword_549FA4 >> 3) & 0x1F);
+      }
+      else
+      {
+        [[Æ«ÒÆ105 1×Ö½Ú]] = 0;
+      }
+    }
+    if ( !*((_DWORD *)dword_54903C + 769) )
+    {
+      if ( *((_BYTE *)dword_54903C + 562) & 0x60 )
+      {
+        if ( sub_44133A(";chinanet_type;") )
+        {
+          byte_549FA0 = 0;
+        }
+        else
+        {
+          if ( sub_44133A(";double_ext;") )
+            byte_549FA0 = 1;
+        }
+      }
+    }
+    [[Æ«ÒÆ310 1×Ö½Ú]] = (byte_549FA0 << 7) | [316];
+    memset(&buf, 0, 0x640u);
+    len = 312;
+    memcpy(&buf, &[[Æ«ÒÆ0 1×Ö½Ú]], 0x138u);
+    if ( *((_WORD *)dword_54903C + 126) )
+    {
+      [[Æ«ÒÆ-16 4×Ö½Ú]] = &buf + len;
+      [-12] = strlen((const char *)::Src + 36);
+      if ( (signed int)[-12] <= 16 )
+        [[Æ«ÒÆ-20 4×Ö½Ú]] = [-12];
+      else
+        [[Æ«ÒÆ-20 4×Ö½Ú]] = 16;
+      *[[Æ«ÒÆ-16 4×Ö½Ú]] = 0;
+      [[Æ«ÒÆ-16 4×Ö½Ú]][1] = [[Æ«ÒÆ-20 4×Ö½Ú]];
+      for ( j = 0; j < [[Æ«ÒÆ-20 4×Ö½Ú]]; ++j )
+      {
+        [[Æ«ÒÆ-16 4×Ö½Ú]][j + 2] = v15[j] ^ *((_BYTE *)::Src + j + 36);
+        [[Æ«ÒÆ-16 4×Ö½Ú]][j + 2] = ((signed int)(unsigned __int8)[[Æ«ÒÆ-16 4×Ö½Ú]][j + 2] >> 5) + 8 * [[Æ«ÒÆ-16 4×Ö½Ú]][j + 2];
+      }
+      len = len + 18 - (16 - [[Æ«ÒÆ-20 4×Ö½Ú]]);
+    }
+    [1928] = &buf + len;
+    *(&buf + len) = 2;
+    [1928][1] = 12;
+    *(_DWORD *)([1928] + 2) = 285681153;
+    *((_WORD *)[1928] + 3) = byte_549FA8;
+    memcpy([1928] + 8, (char *)dword_54903C + 232, 6u);
+    len += 14;
+    len = 4 * (len + 3) / 4;
+    v2 = sub_439068(1234, (int)&buf, len);
+    *(_DWORD *)([1928] + 2) = 1968 * v2;
+    v3 = (int)sub_4397FF("·¢ËÍÕÊºÅÃÜÂë......\n");
+    sub_438787(v3);
+    *((_DWORD *)dword_54903C + 3) = 203;
+    sub_44F640(16);
+    dword_54F200 = *((_DWORD *)dword_54903C + 12);
+    ::len = len;
+    memcpy(byte_54F208, &buf, len);
+    *((_DWORD *)dword_54903C + 135) = GetTickCount();
+    if ( *((_DWORD *)::Dst + 49) == 4 )
+      [[Æ«ÒÆ1924 4×Ö½Ú]] = sub_441860(6);
+    else
+      [[Æ«ÒÆ1924 4×Ö½Ú]] = sub_44084E(&buf, len);
+    v4 = strlen((const char *)::Src + 36);
+    memcpy(&[[Æ«ÒÆ344 1580×Ö½Ú]], (char *)::Src + 36, v4);
+    v5 = strlen((const char *)::Src + 36);
+    Src = sub_446840(&[[Æ«ÒÆ328 2×Ö½Ú]], v5 + 16);
+    memcpy((char *)dword_54903C + 144, Src, 0x10u);
+    sub_44129D((int)((char *)::Src + 36));
+    result = [[Æ«ÒÆ1924 4×Ö½Ú]];
+  }
+  else
+  {
+    result = 541283667;
+  }
+  
+```
