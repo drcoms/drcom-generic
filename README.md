@@ -1,26 +1,26 @@
-login�����������ش������� (�������Ϊ03�İ���<br>
+login包服务器返回错误类型 (发送序号为03的包后）<br>
 > 05000005XX00...
 > v33 = \*(_BYTE \*)(v46 + 4);
-v46�Ƿ������������İ��ĵ�ַ������֮ǰ�����ó�����������v33��Ӧ Dst[4] ��XX��λ��<br>
+v46是服务器传回来的包的地址，（由之前函数得出），看出来v33对应 Dst[4] 即XX的位置<br>
 
 
-XX�Ǵ����ţ���Ӧ�����a2
+XX是错误编号，对应下面的a2
 
-* 0x01 ��������ʹ������˺ţ��������ߵķ�ʽ
-* 0x02 ��������æ�����Ժ����µ�¼
-* 0x03 �ʺŻ��������
-* 0x04 ���ʺŵ��ۼ�ʱ��������ѳ�������
-* 0x05 ���ʺ���ͣʹ��
-* 0x07 IP��ַ��ƥ�䣬���ʺ�ֻ����ָ��IP��ַ��ʹ�� 
-* 0x0b MAC(����)��ַ��ƥ�䣬���ʺ�ֻ����ָ����IP��MAC(����)��ַ��ʹ��
-* 0x14 ����IP��ַ̫��
-* 0x15 �ͻ��˰汾����ȷ
-* 0x16 ���ʺ�ֻ����ָ����Mac��IP��ʹ��
-* 0x17 ���PC�����˾�̬IP,���Ϊ��̬��ȡ��ʽ(DHCP),Ȼ�����µ�¼
-* 0x18 - 0x1c ����������Ϣ
-* ����������ʾ�˺��������
+* 0x01 有人正在使用这个账号，且是有线的方式
+* 0x02 服务器繁忙，请稍候重新登录
+* 0x03 帐号或密码错误
+* 0x04 本帐号的累计时间或流量已超出限制
+* 0x05 本帐号暂停使用
+* 0x07 IP地址不匹配，本帐号只能在指定IP地址上使用 
+* 0x0b MAC(物理)地址不匹配，本帐号只能在指定的IP和MAC(物理)地址上使用
+* 0x14 本帐IP地址太多
+* 0x15 客户端版本不正确
+* 0x16 本帐号只能在指定的Mac和IP上使用
+* 0x17 你的PC设置了静态IP,请改为动态获取方式(DHCP),然后重新登录
+* 0x18 - 0x1c 保留错误信息
+* 其他都会提示账号密码错误
 
-��Դ 0.8 u64�Ŀͻ���
+来源 0.8 u64的客户端
 
 ```
 
@@ -97,22 +97,22 @@ int __cdecl sub_43FB47(int a1, signed int a2)
       _snprintf(&Dest, 0x63Fu, "%s", v2);
       break;
     case 2:
-      v3 = sub_4397FF("��������æ�����Ժ����µ�¼������");
+      v3 = sub_4397FF("服务器繁忙，请稍候重新登录！！！");
       _snprintf(&Dest, 0x63Fu, v3);
       break;
     case 3:
-      v4 = sub_4397FF("�ʺŻ����������������µ�¼������");
+      v4 = sub_4397FF("帐号或密码错误，请检查后重新登录！！！");
       _snprintf(&Dest, 0x63Fu, v4);
       break;
     case 4:
       if ( a2 >= 10 )
       {
-        v6 = sub_4397FF("�����ѳ�֧������ʹ����Ҫ�շѵ�������Դ������");
+        v6 = sub_4397FF("费用已超支，不能使用需要收费的网络资源！！！");
         _snprintf(&Dest, 0x63Fu, v6);
       }
       else
       {
-        v5 = sub_4397FF("���ʺŵ��ۼ�ʱ��������ѳ������ƣ�����ʹ�ã�����");
+        v5 = sub_4397FF("本帐号的累计时间或流量已超出限制，不能使用！！！");
         _snprintf(&Dest, 0x63Fu, v5);
       }
       v40 = 1;
@@ -120,12 +120,12 @@ int __cdecl sub_43FB47(int a1, signed int a2)
     case 5:
       if ( a2 >= 6 )
       {
-        v8 = sub_4397FF("���ʺŵ������ѵ�������ʹ�ã�����");
+        v8 = sub_4397FF("本帐号的期限已到，不能使用！！！");
         _snprintf(&Dest, 0x63Fu, v8);
       }
       else
       {
-        v7 = sub_4397FF("���ʺ���ͣʹ��");
+        v7 = sub_4397FF("本帐号暂停使用");
         _snprintf(&Dest, 0x63Fu, v7);
       }
       break;
@@ -133,12 +133,12 @@ int __cdecl sub_43FB47(int a1, signed int a2)
       if ( a2 >= 9 )
       {
         v10 = sub_445FF7(*(struct in_addr *)(v46 + 5));
-        v11 = sub_4397FF("IP��ַ��ƥ�䣬���ʺ�ֻ����ָ��IP��ַ(%s)��ʹ�ã�����");
+        v11 = sub_4397FF("IP地址不匹配，本帐号只能在指定IP地址(%s)上使用！！！");
         _snprintf(&Dest, 0x63Fu, v11, v10);
       }
       else
       {
-        v9 = sub_4397FF("IP��ַ��ƥ�䣬���ʺ�ֻ����ָ��IP��ַ��ʹ�ã�����");
+        v9 = sub_4397FF("IP地址不匹配，本帐号只能在指定IP地址上使用！！！");
         _snprintf(&Dest, 0x63Fu, v9);
       }
       break;
@@ -151,17 +151,17 @@ int __cdecl sub_43FB47(int a1, signed int a2)
         v16 = *(_BYTE *)(v46 + 7);
         v17 = *(_BYTE *)(v46 + 6);
         v18 = *(_BYTE *)(v46 + 5);
-        v19 = sub_4397FF("MAC(����)��ַ��ƥ�䣬���ʺ�ֻ����ָ����IP��MAC(����)��ַ(%02X-%02X-%02X-%02X-%02X-%02X)��ʹ�ã�����");
+        v19 = sub_4397FF("MAC(物理)地址不匹配，本帐号只能在指定的IP和MAC(物理)地址(%02X-%02X-%02X-%02X-%02X-%02X)上使用！！！");
         _snprintf(&Dest, 0x63Fu, v19, v18, v17, v16, v15, v14, v13);
       }
       else
       {
-        v12 = sub_4397FF("MAC(����)��ַ��ƥ�䣬���ʺ�ֻ����ָ����IP��MAC(����)��ַ��ʹ�ã�����");
+        v12 = sub_4397FF("MAC(物理)地址不匹配，本帐号只能在指定的IP和MAC(物理)地址上使用！！！");
         _snprintf(&Dest, 0x63Fu, v12);
       }
       break;
     case 20:
-      v20 = sub_4397FF("����IP��ַ̫�࣡����");
+      v20 = sub_4397FF("本帐IP地址太多！！！");
       _snprintf(&Dest, 0x63Fu, v20);
       for ( i = 0; i < *((_DWORD *)dword_54903C + 116); ++i )
       {
@@ -173,7 +173,7 @@ int __cdecl sub_43FB47(int a1, signed int a2)
     case 21:
       if ( a2 <= 20 )
       {
-        v25 = sub_4397FF("�ͻ��˰汾����ȷ�������������������ͻ��ˣ�����");
+        v25 = sub_4397FF("客户端版本不正确，请下载升级包升级客户端！！！");
         _snprintf(&Dest, 0x63Fu, v25);
       }
       else
@@ -186,12 +186,12 @@ int __cdecl sub_43FB47(int a1, signed int a2)
         if ( strlen(&Dst) )
         {
           v22 = sub_4397FF(&Dst);
-          v23 = sub_4397FF("�ͻ�����֤ʧ�� : %s");
+          v23 = sub_4397FF("客户端认证失败 : %s");
           _snprintf(&Dest, 0x63Fu, v23, v22);
         }
         else
         {
-          v24 = sub_4397FF("�ͻ��˰汾����ȷ�������������������ͻ��ˣ�����");
+          v24 = sub_4397FF("客户端版本不正确，请下载升级包升级客户端！！！");
           _snprintf(&Dest, 0x63Fu, v24);
         }
         v34 = (const char *)(strlen(&Dst) + 21 + a1);
@@ -206,11 +206,11 @@ int __cdecl sub_43FB47(int a1, signed int a2)
       }
       break;
     case 22:
-      v26 = sub_4397FF("���ʺ�ֻ����ָ����Mac��IP��ʹ�ã�����");
+      v26 = sub_4397FF("本帐号只能在指定的Mac和IP上使用！！！");
       _snprintf(&Dest, 0x63Fu, v26);
       break;
     case 23:
-      v27 = sub_4397FF("���PC�����˾�̬IP,���Ϊ��̬��ȡ��ʽ(DHCP),Ȼ�����µ�¼������");
+      v27 = sub_4397FF("你的PC设置了静态IP,请改为动态获取方式(DHCP),然后重新登录！！！");
       _snprintf(&Dest, 0x63Fu, v27);
       break;
     case 24:
@@ -224,7 +224,7 @@ int __cdecl sub_43FB47(int a1, signed int a2)
       break;
     default:
       sub_438787(v33 - 1);
-      v30 = sub_4397FF("�ʺŻ����������������µ�¼������");
+      v30 = sub_4397FF("帐号或密码错误，请检查后重新登录！！！");
       _snprintf(&Dest, 0x63Fu, v30);
       break;
   }
