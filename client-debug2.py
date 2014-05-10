@@ -226,7 +226,12 @@ def mkpkt(salt, usr, pwd, mac):
     data += '\x1a\x00'
     data += '\x02\x0c'
     data += checksum(data+'\x01\x26\x07\x11\x00\x00'+dump(mac))
-    data += "\x00\x00" + dump(mac)
+    data += '\x00\x00' #delimeter
+    data += dump(mac)
+    data += '\x00' # auto logout / default: False
+    data += '\x00' # broadcast mode / default : False
+    data += '\xc2\x66' #unknown
+    
     log('[mkpkt]',data.encode('hex'))
     return data
 
