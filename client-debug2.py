@@ -219,7 +219,7 @@ def mkpkt(salt, usr, pwd, mac):
     data += '\x28\x0a\x00\x00' # OS build
     data += '\x02\x00\x00\x00' #os unknown
     data += host_os.ljust(32,'\x00')
-    data += '\x00' * 48
+    data += '\x00' * 96
     #data += '\x01' + host_os.ljust(128, '\x00')
     #data += '\x0a\x00\x00'+chr(len(pwd)) # \0x0a represents version of client, algorithm: DRCOM_VER + 100
     #data += ror(md5sum('\x03\x01'+salt+pwd), pwd)
