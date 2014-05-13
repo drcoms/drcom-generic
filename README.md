@@ -1,6 +1,11 @@
 HITwh的Shindo酱的项目也是非常优秀的请参考 <br>
 https://github.com/coverxit/EasyDrcom/
 
+吉林大学用户
+------------------
+由于这个sb学校的特殊性，请使用https://github.com/ly0/jlu-drcom-client里的客户端
+（U62协议中带了dhcp_option，这是其他学校没有的）
+
 login包服务器返回错误类型 (发送序号为03的包后）<br>
 > 05000005XX00...
 
