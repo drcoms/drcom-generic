@@ -1,3 +1,6 @@
+HITwh的Shindo酱的项目也是非常优秀的请参考 <br>
+(EasyDrcom)[https://github.com/coverxit/EasyDrcom/blob/master/EasyDrcom/drcom_dealer.hpp]
+
 login包服务器返回错误类型 (发送序号为03的包后）<br>
 > 05000005XX00...
 
