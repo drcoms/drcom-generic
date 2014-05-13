@@ -184,7 +184,7 @@ def keep_alive2(*args):
         log('[keep_alive2] recv',data.encode('hex'))
         tail = data[16:20]
         #log('DEBUG: keep_alive2,packet 5 return\n',data.encode('hex'))
-        i = i+2
+        i = (i+2) % 0xFF
         time.sleep(20)
         keep_alive1(*args)
       except:
