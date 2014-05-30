@@ -1,6 +1,11 @@
 HITwh的Shindo酱的项目也是非常优秀的请参考 <br>
 https://github.com/coverxit/EasyDrcom/
 
+TODOLIST
+------------------
+* 做一个独立于 *luci* 的设置界面
+* 一个路由器上可以同时使用多个帐号(解决一些帐号限速问题) (由于假期没时间, 预计 9 月底完成) 
+
 吉林大学用户
 ------------------
 由于这个sb学校的特殊性，请使用 https://github.com/ly0/jlu-drcom-client 里的客户端
