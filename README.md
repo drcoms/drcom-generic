@@ -1,5 +1,15 @@
 本页面仅供drcom客户端开发的童鞋有价值，需要有一些相关的知识。
 
+drcom_2011.lua
+---------------------
+这是一个由 *googlecode* 上 *jdrcom* 项目中的 *wireshark* 插件 <br>
+项目地址：(https://code.google.com/p/jdrcom/) <br>
+使用(for windows):
+
+将 *drcom_2011.lua* 放到 *Wireshark.exe* 所在的目录下， 打开 *init.lua* ，在 `dofile(DATA_DIR.."console.lua")` 之后添加 `dofile(DATA_DIR.."drcom_2011.lua")`.
+
+之后就可以在过滤器中使用 *drcom* 协议了。
+
 
 关于 idx=05 错误包的错误信息类型
 ---------------------
