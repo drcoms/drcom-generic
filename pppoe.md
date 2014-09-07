@@ -2,8 +2,8 @@
 ----------------------
 [send]PKT1:<br>
 ```
-0000   07 01 08 00 01 00 00 00
-07心跳，登陆次数为1，类型为 08 00 01 00
+0000   07 55 08 00 01 00 00 00
+07心跳，登陆次数为55，类型为 08 00 01 00
 ```
 
 [recv]PKT2:<br>
@@ -22,6 +22,14 @@
 0050   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 ```
 
+[recv]PKT4:<br>
+```
+0000   07 56 30 00 04 00 20 00 19 33 d6 8b 00 00 00 00
+0010   44 39 d8 ed ca c0 f7 46 a9 86 2b a2 50 78 04 d0
+0020   b0 82 00 60 00 00 00 00 00 00 00 00 00 00 00 00
+```
+
+PKT3包的构造：
 ```c
 //----- (0805E52B) --------------------------------------------------------
 int __usercall DrcomDialExtProtoSendLoginPacket<eax>(int a1<esi>)
@@ -58,26 +66,30 @@ int __usercall DrcomDialExtProtoSendLoginPacket<eax>(int a1<esi>)
   v25 = (int)&v23;
   v26 = &v24;
   v27 = DRCOM_CLIENT_KERNEL_VER;
-  memset(&v23, 0, 0x200u);
+  memset(&v23, 0, 0x200u); // 缓冲区 512 字节
   v1 = v25;
-  memset((void *)v25, 0, 0x20u);
+  memset((void *)v25, 0, 0x20u); // 先看前32个字节
   v2 = v1 + 32;
-  *(_BYTE *)v25 = 7;
+  // 正式开始
+  *(_BYTE *)v25 = 7; // 07
   v3 = as[160];
-  *(_BYTE *)(v25 + 1) = as[160];
+  *(_BYTE *)(v25 + 1) = as[160]; // 心跳次数 对应 56 ，这里应是pkt1的序数+1 
   as[160] = v3 + 1;
-  *(_BYTE *)(v25 + 4) = 3;
-  v4 = v25 + 6;
-  *(_DWORD *)(v25 + 6) = 0;
-  *(_WORD *)(v4 + 4) = 0;
-  *(_DWORD *)(v25 + 12) = *(_DWORD *)&as[204];
-  *(_DWORD *)(v25 + 16) = 512;
-  *(_DWORD *)(v25 + 20) = *(_DWORD *)&as[164];
-  *(_DWORD *)(v25 + 24) = 20000711;
-  *(_DWORD *)(v25 + 28) = 126;
-  *(_BYTE *)(v25 + 5) = 0;
-  *(_WORD *)(v25 + 2) = *(_BYTE *)(v25 + 5) + 96;
-  v5 = (int)((char *)v26 + *(_BYTE *)(v25 + 5));
+  *(_BYTE *)(v25 + 4) = 3; // 对应 [+4]的 03
+  v4 = v25 + 6; // v4 = [+6]
+  *(_DWORD *)(v25 + 6) = 0; // 4个字节全0 [+6]
+  *(_WORD *)(v4 + 4) = 0; //对应ac 15前的00 00
+  *(_DWORD *)(v25 + 12) = *(_DWORD *)&as[204]; // as[204]内容见下面分析
+  *(_DWORD *)(v25 + 16) = 512; //0x0200 -> 02 00 00 00
+  *(_DWORD *)(v25 + 20) = *(_DWORD *)&as[164]; //as[164]是上个包的[+8-+11]的部分即 cf 89 a8 03
+  *(_DWORD *)(v25 + 24) = 20000711; //0x01312fc7
+  *(_DWORD *)(v25 + 28) = 126; // 0x7e
+  *(_BYTE *)(v25 + 5) = 0; // [+5] = 00
+  *(_WORD *)(v25 + 2) = *(_BYTE *)(v25 + 5) + 96; // 前面为0所以是0x60 -> 60 00 ，这个就是 [+2][+3]的60 00
+  v5 = (int)((char *)v26 + *(_BYTE *)(v25 + 5)); //v5是地址计算，不管
+  // 上面是32个字节的验证信息
+  // 下面是64个字节的某些玩意
+  // 加起来正好96字节
   *(_DWORD *)v5 = *(_DWORD *)&as[576];
   *(_DWORD *)(v5 + 4) = *(_DWORD *)&as[580];
   *(_DWORD *)(v5 + 8) = *(_DWORD *)&as[584];
@@ -174,5 +186,46 @@ int __usercall DrcomDialExtProtoSendLoginPacket<eax>(int a1<esi>)
     v22 = 542265925;
   }
   return v22;
+}
+```
+
+as[204]
+```
+signed int __usercall DrcomDialExtProtoHandle_ChallengeRep<eax>(int a1<esi>, int a2, unsigned int a3)
+{
+  signed int v4; // [sp+14h] [bp-14h]@12
+
+  if ( a3 <= 0xF || *(_BYTE *)a2 != 7 || *(_BYTE *)(a2 + 4) != 2 )
+  {
+    v4 = 542265925;
+  }
+  else
+  {
+    if ( *(_DWORD *)&as[24] == 501 )
+    {
+      *(_DWORD *)&as[24] = 502;
+      *(_DWORD *)&as[204] = *(_DWORD *)(a2 + 12); //上个包[+12-+15] 这里是pkt2的ac 15 05 0f
+      *(_DWORD *)&as[976] = 1;
+      if ( !*(_DWORD *)&as[116] )
+        *(_DWORD *)&as[116] = *(_DWORD *)&as[96];
+      if ( !*(_DWORD *)&as[968] )
+      {
+        *(_DWORD *)&as[968] = *(_DWORD *)&as[116];
+        SetServerIP(*(int *)&as[116]);
+      }
+      *(_DWORD *)&as[164] = *(_DWORD *)(a2 + 8);
+      if ( !bAuthIPInfoSended )
+      {
+        SaveAuthServerIP(*(int *)&as[96]);
+        GetHostInfo(a1, 135578028, 1);
+        SendLoginStatus(0);
+        bAuthIPInfoSended = 1;
+      }
+      *(_DWORD *)&as[552] = 0;
+      DrcomDialExtProtoSendLoginPacket(a1);
+    }
+    v4 = 541283667;
+  }
+  return v4;
 }
 ```
