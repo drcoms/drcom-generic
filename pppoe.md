@@ -89,7 +89,7 @@ int __usercall DrcomDialExtProtoSendLoginPacket<eax>(int a1<esi>)
   
   v5 = (int)((char *)v26 + *(_BYTE *)(v25 + 5)); //v5是地址计算，不管，是后面那一坨莫名其妙的东西
   // 上面是32个字节的验证信息
-  // 下面是64个字节的某些玩意
+  // 下面是64个字节的某些玩意，个人认为可以全部设为0
   // 加起来正好96字节
   *(_DWORD *)v5 = *(_DWORD *)&as[576];
   *(_DWORD *)(v5 + 4) = *(_DWORD *)&as[580];
