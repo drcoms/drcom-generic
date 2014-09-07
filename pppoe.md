@@ -79,14 +79,15 @@ int __usercall DrcomDialExtProtoSendLoginPacket<eax>(int a1<esi>)
   v4 = v25 + 6; // v4 = [+6]
   *(_DWORD *)(v25 + 6) = 0; // 4个字节全0 [+6]
   *(_WORD *)(v4 + 4) = 0; //对应ac 15前的00 00
-  *(_DWORD *)(v25 + 12) = *(_DWORD *)&as[204]; // as[204]内容见下面分析
-  *(_DWORD *)(v25 + 16) = 512; //0x0200 -> 02 00 00 00
+  *(_DWORD *)(v25 + 12) = *(_DWORD *)&as[204]; // as[204]内容见下面分析, ac 15 05  0f
+  *(_DWORD *)(v25 + 16) = 512; //0x0200 -> 00 00 02 00 【后面会对这个内容修改】最终结果是00 62 00 14
   *(_DWORD *)(v25 + 20) = *(_DWORD *)&as[164]; //as[164]是上个包的[+8-+11]的部分即 cf 89 a8 03
-  *(_DWORD *)(v25 + 24) = 20000711; //0x01312fc7
-  *(_DWORD *)(v25 + 28) = 126; // 0x7e
+  *(_DWORD *)(v25 + 24) = 20000711; //0x01312fc7   现在是 66 cc 58 2f，估计是对前32个字节做个CRC，然后再覆盖这段内容【后面会对这个内容修改】
+  *(_DWORD *)(v25 + 28) = 126; // 0x7e （一会会变成一堆0）
   *(_BYTE *)(v25 + 5) = 0; // [+5] = 00
-  *(_WORD *)(v25 + 2) = *(_BYTE *)(v25 + 5) + 96; // 前面为0所以是0x60 -> 60 00 ，这个就是 [+2][+3]的60 00
-  v5 = (int)((char *)v26 + *(_BYTE *)(v25 + 5)); //v5是地址计算，不管
+  *(_WORD *)(v25 + 2) = *(_BYTE *)(v25 + 5) + 96; // 前面为0所以是0x60 -> 60 00 ，这个就是 [+2][+3]的60 00，应该表示的是包的长度
+  
+  v5 = (int)((char *)v26 + *(_BYTE *)(v25 + 5)); //v5是地址计算，不管，是后面那一坨莫名其妙的东西
   // 上面是32个字节的验证信息
   // 下面是64个字节的某些玩意
   // 加起来正好96字节
@@ -106,38 +107,51 @@ int __usercall DrcomDialExtProtoSendLoginPacket<eax>(int a1<esi>)
   *(_DWORD *)(v5 + 52) = *(_DWORD *)&as[628];
   *(_DWORD *)(v5 + 56) = *(_DWORD *)&as[632];
   *(_DWORD *)(v5 + 60) = *(_DWORD *)&as[636];
+  
+  
+  // 一些配置信息，意义不大，__start__
   AntiProxyModule_Call(v2, a1, 9);
   v6 = *(_DWORD *)&drcfg[304];
   DebugMessage(
     (unsigned int)"IS_CONFIG_PPPOE_USE_DRCOM_966_SERVER=%d\nas.DrcomPPPoEAuthRetry966Kern=%d\nAntiProxyModule_Call(DRCOMDLL_CHECK_IS_LOADED)=%d\n",
     (v6 & 0x40000) != 0);
   v7 = *(_DWORD *)&drcfg[304];
+  // 一些配置信息，意义不大，__end__
+  
+  
   if ( (v7 & 0x40000 || *(_DWORD *)&as[680]) && ((v8 = *(_DWORD *)&drcfg[304], !(v8 & 0x40000)) || !*(_DWORD *)&as[680])
     || AntiProxyModule_Call(v2, a1, 9) != 541283667 )
   {
+    /*
+      巴拉巴拉以后 512 += 24, v27 = DRCOM_CLIENT_KERNEL_VER;,这个版本号在log_version_info()找到，对固定版本是定值
+    */
     *(_DWORD *)(v25 + 16) += v27 << 24;
   }
   else
   {
+    // 样本对应的是这个分支
     v9 = *(_DWORD *)(v25 + 16);
-    BYTE1(v9) |= 0x62u;
+    // v9 = 512
+    BYTE1(v9) |= 0x62u; // 可能的意思是取第v9的第一个字节00 00 02 00的 00 00 然后这个字节或上0x0062
     *(_DWORD *)(v25 + 16) = v9;
     v10 = *(_DWORD *)&drcfg[304];
     if ( !(v10 & 0x80000) )
       *(_DWORD *)(v25 + 16) += v27 << 24;
   }
+  // 反正结果是00 62 00 14
+  
   if ( *(_DWORD *)&as[676] )
   {
     v11 = *(_DWORD *)(v25 + 16);
     BYTE1(v11) |= 0x80u;
     *(_DWORD *)(v25 + 16) = v11;
   }
+  // 下面这段是报告
   if ( *(_DWORD *)&as[676] <= 5u )
   {
     DebugMessage((unsigned int)"as.IsDrcomDialConnectionFirstActive=%d\n", as[668]);
     if ( *(_DWORD *)&as[668] && *(_DWORD *)&as[672] )
     {
-      *(_DWORD *)(v25 + 16) = *(_DWORD *)(v25 + 16);
       if ( !*(_DWORD *)&as[552] )
       {
         v13 = drlang_get_lang((int)&unk_80FCFD4);
@@ -156,16 +170,20 @@ int __usercall DrcomDialExtProtoSendLoginPacket<eax>(int a1<esi>)
       v18 = drlang_get_lang((int)"Dr.COM PPPoE start onlineing %08X.");
       DebugMessage(v18, v17);
     }
-    *(_WORD *)(v25 + 2) = 4 * (*(_WORD *)(v25 + 2) + 3) / 4;
-    v19 = DrcomCRC32(0, v25, *(_WORD *)(v25 + 2));
-    *(_DWORD *)(v25 + 24) = 19680126 * v19;
-    *(_DWORD *)(v25 + 28) = 0;
+    
+    
+    v19 = DrcomCRC32(0, v25, *(_WORD *)(v25 + 2)); //v25 + 2对应的是包的长度96字节,这里是对整个包做一次CRC
+    *(_DWORD *)(v25 + 24) = 19680126 * v19; // 19680126*CRC替换掉[+24]的四个字节
+    *(_DWORD *)(v25 + 28) = 0; // 就是那个0x7e变成一堆0的情况
+    
+    // 更新一些全局变量，无关痛痒
     *(_DWORD *)&as[656] = *(_DWORD *)(v25 + 24);
     if ( *(_DWORD *)&as[668] == 1 )
       *(_DWORD *)&as[660] = *(_DWORD *)(v25 + 24);
     i = 0;
     v29 = (int *)((char *)v26 + *(_BYTE *)(v25 + 5));
-    // 下面一段是CRC
+    
+    
     for ( i = 0; i <= 0x3F; ++i )
     {
       a1 = (int)((char *)v29 + i);
