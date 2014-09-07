@@ -183,7 +183,7 @@ int __usercall DrcomDialExtProtoSendLoginPacket<eax>(int a1<esi>)
     i = 0;
     v29 = (int *)((char *)v26 + *(_BYTE *)(v25 + 5));
     
-    
+    //下面的东西不影响包的结构，是一些提示信息和日志的更新，没什么意义
     for ( i = 0; i <= 0x3F; ++i )
     {
       a1 = (int)((char *)v29 + i);
