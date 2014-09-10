@@ -47,12 +47,11 @@ a8 a4 00 00 3a ae 6f 3c 00 00 00 00 d8 02 00 00
 ac 15 05 0f // AuthHostIP
 00 62 00 14 // option, 第一次发送是这个，第二次则是 00 63 00 14 (0x14006300)
 /*
- 校验位unsigned long pCrcBuff生成，不加密则是初始化为 [0]:DRCOM_DIAL_EXT_PROTO_CRC_INIT(0x01312fc7) 126(0x0000007e)
+ 这里由于上方other[0] == 0 为老版本，不采用加密
 */
-cf 89 a8 03 66 cc 58 2f
+cf 89 a8 03 // ChallengeSeed[4]
 
-
-00 00 00 00
+66 cc 58 2f 00 00 00 00 // crc[2] (unsigned long)
 
 //_tagDrcomDialExtProtoNetWorkInfo
 //基本格式
