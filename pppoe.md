@@ -26,18 +26,46 @@ pppoe心跳
 
 [recv]PKT2:<br>
 ```
-0000   07 55 10 00 02 00 00 00 cf 89 a8 03 ac 15 05 0f
-0010   a8 a4 00 00 3a ae 6f 3c 00 00 00 00 d8 02 00 00
+07 // header.code
+55 // header.id
+10 00 // header.length
+02 // header.type
+00 00 00 // other[3] other[0]确定加密方式，0为不加密
+cf 89 a8 03 // ChallengeSeed[4]
+ac 15 05 0f // ClientSouIp
+a8 a4 00 00 3a ae 6f 3c 00 00 00 00 d8 02 00 00
 ```
 
 [send]PKT3:<br>
 ```
-0000   07 56 60 00 03 00 00 00 00 00 00 00 ac 15 05 0f
-0010   00 62 00 14 cf 89 a8 03 66 cc 58 2f 00 00 00 00
-0020   00 00 00 00 00 00 00 8b ac 2a 14 78 ff ff ff ff //8b应该是某个版本号之类的 ac 2a 14 78  = 172 42 20 120 是啥的ip ff ff ff ff = 255.255.255.255 应该对应某个掩码
-0030   00 a0 59 06 00 20 00 03 c0 51 25 08 ff ff ff 00 // c0 51 25 08 ff ff ff 00 = 192.81.37.8 255.255.255.0 不清楚这些是什么,00 a0 59 06 00 01 00 03 应该是某种特定信息
-0040   00 a0 59 06 00 01 00 03 c0 51 2b 08 ff ff ff 00 //c0 51 2b 08 ff ff ff 00 = 192.168.43.8 255.255.255.0,00 a0 59 06 00 01 00 03应该是某种特定信息
-0050   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+07 //header.code
+56 //header.id
+60 00 //header.length
+03 //header.type
+00 //uid length (strlen(us.Account))
+00 00 00 00 00 00 //mac
+ac 15 05 0f // AuthHostIP
+00 62 00 14 // option, 第一次发送是这个，第二次则是 00 63 00 14 (0x14006300)
+/*
+ 校验位unsigned long pCrcBuff生成，不加密则是初始化为 [0]:DRCOM_DIAL_EXT_PROTO_CRC_INIT(0x01312fc7) 126(0x0000007e)
+*/
+cf 89 a8 03 66 cc 58 2f
+
+
+00 00 00 00
+
+//_tagDrcomDialExtProtoNetWorkInfo
+//基本格式
+
+00 00 00 00 00 00 // mac
+00 //netmark
+8b //type
+ac 2a 14 78 //sip
+ff ff ff ff //smask
+//下同
+00 a0 59 06 00 20 00 03 c0 51 25 08 ff ff ff 00 
+00 a0 59 06 00 01 00 03 c0 51 2b 08 ff ff ff 00
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
 ```
 
 [recv]PKT4:<br>
