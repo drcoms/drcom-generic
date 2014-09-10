@@ -57,6 +57,7 @@ cf 89 a8 03 // ChallengeSeed[4]
 crc[0]: 19680126 * DrCOMCRC32(0, loginpacket, 96)
 crc[1]: 0
 
+//代码中应该是要对这个进行加密的，但是实际上却没发现加密了，奇怪
 //_tagDrcomDialExtProtoNetWorkInfo
 //基本格式
 
@@ -88,11 +89,33 @@ ff ff ff ff //smask
 ```
 
 pkt3 校验
-旧版本仅做CRC32
-新版本则
+加密：
 ```c
 for (int index = 0; index < pcrcLen; index++)
 {
   pcrcstart[index] = (unsigned char)((pcrcstart[index] << (index & 0x07) + (pcrcstart[index] >> (8 - (index & 0x07))));
 }
 ```
+```python
+def _netinfo_encrypt(self, data):
+	s = ''
+	for index, c in enumerate(data):
+		foo = ord(c) << index & 0x07
+		foo &= 0xFF # 去掉多余位
+		bar = ord(c) >> (8 - (index & 0x07))
+		bar &= 0xFF
+		s += chr((foo + bar) & 0xFF)
+	return s
+```
+解密：
+```python
+def _netinfo_decrypt(data):
+	s = ''
+	for index, c in enumerate(data):
+		foo = ord(c) >> index & 0x07
+		foo &= 0xFF # 去掉多余位
+		bar = ord(c) << (8 - (index & 0x07))
+		bar &= 0xFF
+		s += chr((foo + bar) & 0xFF)
+	return s
+	```
