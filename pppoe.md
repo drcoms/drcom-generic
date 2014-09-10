@@ -53,6 +53,9 @@ cf 89 a8 03 // ChallengeSeed[4]
 
 // 先初始化为20000711,126
 66 cc 58 2f 00 00 00 00 // crc[2] (unsigned long)
+旧版本，此时CRC计算方法为
+crc[0]: 19680126 * DrCOMCRC32(0, loginpacket, 96)
+crc[1]: 0
 
 //_tagDrcomDialExtProtoNetWorkInfo
 //基本格式
