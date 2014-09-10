@@ -40,7 +40,7 @@ a8 a4 00 00 3a ae 6f 3c 00 00 00 00 d8 02 00 00
 ```
 07 //header.code
 56 //header.id
-60 00 //header.length
+60 00 //header.length = Loginpack + uidlength + networkinfo * 4 = 96
 03 //header.type
 00 //uid length (strlen(us.Account))
 00 00 00 00 00 00 //mac
@@ -51,6 +51,7 @@ ac 15 05 0f // AuthHostIP
 */
 cf 89 a8 03 // ChallengeSeed[4]
 
+// 先初始化为20000711,126
 66 cc 58 2f 00 00 00 00 // crc[2] (unsigned long)
 
 //_tagDrcomDialExtProtoNetWorkInfo
