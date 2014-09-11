@@ -67,3 +67,50 @@ struct  _tagLoginPacket
     unsigned char DogVersion;
 };
 ```
+
+扩展认证：
+```c
+//LDAP认证数据附加在认证结果后面，没有LDAp认证时，没有这些数据
+struct  _tagLDAPAuth
+{
+    unsigned char Code;
+    unsigned char PasswordLen;
+    unsigned char Password[MD5_LEN];
+};
+
+
+//认证扩展数据，在LDAP认证数据后面
+struct  _tagDrcomAuthExtData
+{
+    unsigned char Code;
+    unsigned char Len;
+    unsigned long CRC;
+    unsigned short Option;
+    unsigned char AdapterAddress[MAC_LEN];
+};
+```
+
+服务器返回登陆结果：
+```c
+//  <===
+struct  _tagReturnErrorCode
+{
+    struct _tagDrCOMHeader Header;
+    unsigned char ErrCode;
+    unsigned char ErrData[15];
+    unsigned char ErrMessage[2];
+};
+
+//  <===
+struct _tagReturnLoginResult
+{
+    struct _tagDrCOMHeader Header;
+    unsigned char SubCode;
+    unsigned int UsedMinutes;   //min
+    unsigned int UsedFlux;      //Kb
+    unsigned int Balance;
+    unsigned char unknow1;
+    unsigned char VPNFlag;
+    unsigned int VPNxChangeIP;
+};
+```
