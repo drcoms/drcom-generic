@@ -45,8 +45,7 @@ struct  _tagReturnChallenge
 };
 ```
 
-登陆包：
-
+登陆包：（注意分几个部分，发送的是几个部分的合体）
 ```c
 struct  _tagLoginPacket
 {
@@ -68,9 +67,9 @@ struct  _tagLoginPacket
 };
 ```
 
-扩展认证：
 ```c
 //LDAP认证数据附加在认证结果后面，没有LDAp认证时，没有这些数据
+//目前的样本里没有这一段
 struct  _tagLDAPAuth
 {
     unsigned char Code;
@@ -82,11 +81,11 @@ struct  _tagLDAPAuth
 //认证扩展数据，在LDAP认证数据后面
 struct  _tagDrcomAuthExtData
 {
-    unsigned char Code;
+    unsigned char Code; //一般和版本有关
     unsigned char Len;
-    unsigned long CRC;
+    unsigned long CRC; 
     unsigned short Option;
-    unsigned char AdapterAddress[MAC_LEN];
+    unsigned char AdapterAddress[MAC_LEN]; //mac地址
 };
 ```
 
@@ -114,3 +113,5 @@ struct _tagReturnLoginResult
     unsigned int VPNxChangeIP;
 };
 ```
+
+
