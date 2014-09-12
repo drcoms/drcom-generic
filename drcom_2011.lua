@@ -1,6 +1,7 @@
 --Wireshark dr.com协议插件
 --By Lixiang，douniwan5788
---Last Modify   2011/11/29
+--Last Modified   2014/09/12
+--Last modified author: latyas
 
 do --do...end是Lua语言的语句块关键字
     --创建一个Proto类的对象，表示一种协议
@@ -57,8 +58,8 @@ do --do...end是Lua语言的语句块关键字
     pf.f_usernamelen = ProtoField.uint8("drcom.usernamelen","Username length",base.DEC)
     pf.f_md5a =	ProtoField.bytes("drcom.md5a", "MD5A=md5(code +type +challenge +password)") --ubytes
     pf.f_username = ProtoField.string("drcom.username", "Username")
-
-    pf.f_macflag =	ProtoField.bool("drcom.macflag", "MAC Flag(01)")	--ubytes
+    pf.f_ControlCheckStatus = ProtoField.string("drcom.ControlCheckStatus", "ControlCheckStatus")
+    pf.f_macflag =	ProtoField.bool("drcom.macflag", "AdapterNum")	--ubytes
     pf.f_macxor =	ProtoField.bytes("drcom.xormac", "MAC xor MD5A")	--ubytes
     pf.f7 =		ProtoField.bytes("drcom.md5b", "MD5B=md5(01 +password +challenge +00*4)") --ubytes
     pf.f_niccount =	ProtoField.uint8("drcom.niccount", "NIC count")
@@ -75,15 +76,20 @@ do --do...end是Lua语言的语句块关键字
     pf.f14 =	ProtoField.ipv4("drcom.pdns","Primary Dns")
     pf.f15 =	ProtoField.ipv4("drcom.dhcp","DHCP Server")
     pf.f16 =	ProtoField.ipv4("drcom.sdns","Secondary Dns")
-    pf.f19 =	ProtoField.bytes("drcom.major","OS major")
-    pf.f20 =	ProtoField.bytes("drcom.minor","OS minor")
-    pf.f21 =	ProtoField.bytes("drcom.build","OS build")
-    pf.f22 =	ProtoField.uint32("drcom.unknown","host_unknown1",base.HEX)
-    pf.f_kernel =	ProtoField.string("drcom.kernelver","Kernel Version" )
-    pf.f25 =	ProtoField.uint32("drcom.unknown","unknown(fixed for a specific client)",base.HEX)
-    pf.f26 =	ProtoField.bytes("drcom.checksum","Checksum2" )	--ubytes
-    pf.f_unknown =	ProtoField.bytes("drcom.unknown","Unknown")
-    pf.f_fixedUnknown =	ProtoField.bytes("drcom.fixed","Fixed Unknown")
+    pf.f16_1 =	ProtoField.uint32("drcom.WINSIP1","WINSIP1")
+    pf.f16_2 =	ProtoField.uint32("drcom.WINSIP2","WINSIP2")
+    pf.f17 =	ProtoField.uint32("drcom.OSVersionInfoSize","OSVersionInfoSize")
+    pf.f19 =	ProtoField.uint32("drcom.major","OS major")
+    pf.f20 =	ProtoField.uint32("drcom.minor","OS minor")
+    pf.f21 =	ProtoField.uint32("drcom.build","OS build")
+    pf.f22 =	ProtoField.uint32("drcom.PlatformID","PlatformID")
+    pf.f_servicepack =	ProtoField.string("drcom.servicepack","servicepack" )
+    pf.f25_1 = ProtoField.bytes("drcom.version", "ClientVerInfoAndInternetMode")
+    pf.f25_2 = ProtoField.bytes("drcom.dogversion", "DogVersion")
+    pf.f25_3 = ProtoField.bytes("drcom.AuthExtDataCode", "AuthExtDataCode")
+    pf.f25_4 = ProtoField.bytes("drcom.AuthExtDatalen", "AuthExtDataLength")
+    pf.f26 =	ProtoField.uint32("drcom.checksum","CRC",base.HEX)	--ubytes
+    pf.f27 =	ProtoField.uint16("drcom.AuthExtDataOption","AuthExtDataOption",base.HEX)
     pf.f28 =	ProtoField.ether("drcom.mac","MAC" )
     pf.f29 =	ProtoField.bool("drcom.autologout","Auto logout")
     pf.f30 =	ProtoField.bool("drcom.brcomcast","Brcomcast mode" )
@@ -96,6 +102,7 @@ do --do...end是Lua语言的语句块关键字
     pf.f_authinfo =	ProtoField.bytes("drcom.authinfo","Auth Infomation")
     pf.f_uptime =	ProtoField.uint16("drcom.uptime","some time in Seconds",base.DEC)
     pf.f_alivefixed=ProtoField.uint32("drcom.unknown","Unknown 01/00")
+    pf.f_unknownbyte =	ProtoField.bytes("drcom.unknownbyte","unknown")
     local t_failtype = {[0x01]="Already in use",
 			[0x02]="server problem",
 			[0x03]="Username or password error!",
@@ -166,7 +173,7 @@ do --do...end是Lua语言的语句块关键字
 	    subtree:add(pf.f_usernamelen,buf(3,1),buf(3,1):uint()-20)  --usernamelen
 	    subtree:add(pf.f_md5a,buf(4,16))
 	    subtree:add(pf.f_username,buf(20,36))
-    	    subtree:add(pf.f_fixedUnknown,buf(56,1))
+    	subtree:add(pf.f_ControlCheckStatus,buf(56,1))
 	    subtree:add(pf.f_macflag,buf(57,1))
 	    subtree:add(pf.f_macxor,buf(58,6))
 	    subtree:add(pf.f7,buf(64,16))
@@ -185,22 +192,25 @@ do --do...end是Lua语言的语句块关键字
 	    subtree:add(pf.f14,buf(142,4))
 	    subtree:add(pf.f15,buf(146,4))
 	    subtree:add(pf.f16,buf(150,4))
-	    subtree:add(pf.f_zeros,buf(154,8))
-	    subtree:add(pf.f_unknown,buf(162,4))
+	    subtree:add(pf.f16_1,buf(154,4))
+	    subtree:add(pf.f16_2,buf(158,4))
+	    subtree:add(pf.f17,buf(162,4))
 	    subtree:add(pf.f19,buf(166,4))
 	    subtree:add(pf.f20,buf(170,4))
 	    subtree:add(pf.f21,buf(174,4))
 	    subtree:add(pf.f22,buf(178,4))
-	    subtree:add(pf.f_kernel,buf(182,32))
-	    subtree:add(pf.f_zeros,buf(214,96))
-	    subtree:add(pf.f25,buf(310,4))
+	    subtree:add(pf.f_servicepack,buf(182,129))
+	    subtree:add(pf.f25_1,buf(310,1))
+	    subtree:add(pf.f25_2,buf(311,1))
+	    subtree:add(pf.f25_3,buf(312,1))
+	    subtree:add(pf.f25_4,buf(313,1))
 	    subtree:add(pf.f26,buf(314,4))
-	    subtree:add(pf.f_unknown,buf(318,2))
+	    subtree:add(pf.f27,buf(318,2))
 	    subtree:add(pf.f28,buf(320,6))
 	    subtree:add(pf.f29,buf(326,1))
 	    subtree:add(pf.f30,buf(327,1))
 	    if buf():len()>=330 then
-		subtree:add(pf.f_unknown,buf(328,2))
+		subtree:add(pf.f_unknownbyte,buf(328,2))
 	    end
 	elseif code_id == 0x04  then
 	    if buf():len()>=37 then
