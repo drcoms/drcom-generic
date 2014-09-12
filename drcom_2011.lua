@@ -1,7 +1,6 @@
 --Wireshark dr.com协议插件
 --By Lixiang，douniwan5788
---Last Modified   2014/09/12
---Last modified author: latyas
+--Last Modify   2011/11/29
 
 do --do...end是Lua语言的语句块关键字
     --创建一个Proto类的对象，表示一种协议
@@ -29,7 +28,10 @@ do --do...end是Lua语言的语句块关键字
 		    [0xff]="Alive, Client to Server per 20s"
 		    }
     pf.f_code = ProtoField.uint8("drcom.code","Code",base.HEX,t_code)
-
+    pf.f_authtype = ProtoField.uint8("drcom.authtype","AuthType",base.HEX)
+    pf.f_subcode = ProtoField.uint8("drcom.subcode","Subcode",base.HEX)
+    pf.f_cmdlen = ProtoField.uint8("drcom.cmdlen","CMDLength",base.HEX)
+    
     local t_type = {[0x25]="Out of money",	--0x4d25
 		    [0x26]="alive_4_server",	--ox4d26
 		    [0x38]="Server Infomation",	--ox4d38
@@ -98,7 +100,8 @@ do --do...end是Lua语言的语句块关键字
     pf.f_EOF =	ProtoField.uint8("drcom.eof","EOF")
     pf.f_serverIP =	ProtoField.ipv4("drcom.svrIP","Server IP")
     pf.f_clientIP =	ProtoField.ipv4("drcom.cliIP","Client IP")
-    pf.f_drco =	ProtoField.string("drcom.drco","unnkown drco")
+    pf.f_drco =	ProtoField.string("drcom.drco","DrcomFlag(Drco)")
+    pf.f_port =	ProtoField.uint16("drcom.port","Port")
     pf.f_authinfo =	ProtoField.bytes("drcom.authinfo","Auth Infomation")
     pf.f_uptime =	ProtoField.uint16("drcom.uptime","some time in Seconds",base.DEC)
     pf.f_alivefixed=ProtoField.uint32("drcom.unknown","Unknown 01/00")
@@ -134,7 +137,8 @@ do --do...end是Lua语言的语句块关键字
     pf.f_monthtime =	ProtoField.uint32("drcom.monthtime","Month used time(MIN)")
     pf.f_balance =	ProtoField.float("drcom.balance","Balance(yuan)",base.DEC)
     pf.f_timebalance =	ProtoField.float("drcom.timebalance","Time Balance(Minutes)",base.DEC)
-
+    pf.f_milliseconds	=	ProtoField.uint16("drcom.milliseconds","Milliseconds")
+    pf.f_internetaccessControl	=	ProtoField.uint32("drcom.InternetAccessControl","InternetAccessControl")
 
 --    local addr = Field.new("ip.addr")
 
@@ -148,16 +152,22 @@ do --do...end是Lua语言的语句块关键字
 
 	--这句是将数据的第一个字节转换成无符号整数
 	local code_id =	buf(0,1):uint()
+	-- DrCOMHeader
 	subtree:add(pf.f_code,buf(0,1))
+  subtree:add(pf.f_authtype,buf(1,1))
+  subtree:add(pf.f_subcode,buf(2,1))
+  subtree:add(pf.f_cmdlen,buf(3,1))
 	pkt.cols.info=t_code[code_id] or "Unknown"
 
 -------------------------------------------------------------------------------------------
 	if code_id == 0x01  then	--complite
+      -- Challenge
 	    subtree:add(pf.f1_1dir,buf(1,1))
 	    subtree:add_le(pf.f_uptime,buf(2,2))
 	    subtree:add(pf.f1_unkonw02,buf(4,1))
 	    subtree:add(pf.f_zeros,buf(5,15))
 	elseif code_id == 0x02  then
+      -- Challenge return
 	    subtree:add(pf.f1_1dir,buf(1,1))
 	    subtree:add_le(pf.f_uptime,buf(2,2))
 	    subtree:add(pf.f2_1dir,buf(4,4))
@@ -167,9 +177,9 @@ do --do...end是Lua语言的语句块关键字
 	    subtree:add(pf.f_mm,buf(26,16))
 	    subtree:add(pf.f_zeros,buf(42,34))
 	elseif code_id == 0x03  then	--complite
+      -- 用户登录
 	    pkt.cols.info:append(" (Username=\""..buf(20,36):stringz().."\")")
 	    subtree:add(pf.f_type,buf(1,1))
-	    subtree:add(pf.f_EOF,buf(2,1))
 	    subtree:add(pf.f_usernamelen,buf(3,1),buf(3,1):uint()-20)  --usernamelen
 	    subtree:add(pf.f_md5a,buf(4,16))
 	    subtree:add(pf.f_username,buf(20,36))
@@ -199,7 +209,7 @@ do --do...end是Lua语言的语句块关键字
 	    subtree:add(pf.f20,buf(170,4))
 	    subtree:add(pf.f21,buf(174,4))
 	    subtree:add(pf.f22,buf(178,4))
-	    subtree:add(pf.f_servicepack,buf(182,129))
+	    subtree:add(pf.f_servicepack,buf(182,128))
 	    subtree:add(pf.f25_1,buf(310,1))
 	    subtree:add(pf.f25_2,buf(311,1))
 	    subtree:add(pf.f25_3,buf(312,1))
@@ -213,6 +223,7 @@ do --do...end是Lua语言的语句块关键字
 		subtree:add(pf.f_unknownbyte,buf(328,2))
 	    end
 	elseif code_id == 0x04  then
+    -- Login return
 	    if buf():len()>=37 then
 		subtree:add(pf.f_fixedUnknown,buf(1,22))
 		subtree:add_le(pf.f_monthtime,buf(5,4))
@@ -221,10 +232,12 @@ do --do...end是Lua语言的语句块关键字
 		local authinfo = subtree:add(pf.f_authinfo,buf(23,16))
 		authinfo:add(pf.f_drco,buf(23,4))
 		authinfo:add(pf.f_serverIP,buf(27,4))
-		authinfo:add(pf.f_unknown,buf(31,2))
+		authinfo:add(pf.f_port,buf(31,2))
 		authinfo:add(pf.f_clientIP,buf(33,4))
-		authinfo:add(pf.f_unknown,buf(37,2))
-		authinfo:add(pf.f_fixedUnknown,buf(39,6))
+		authinfo:add(pf.f_port,buf(37,2))
+		authinfo:add(pf.f_milliseconds,buf(39,2))
+		authinfo:add(pf.f_internetaccessControl,buf(41,4))
+		-- authinfo:add(pf.f_fixedUnknown,buf(39,6))
 	    end
 	elseif code_id == 0x05  then
 	    subtree:add(pf.f_failtype,buf(4,1))
@@ -295,16 +308,17 @@ do --do...end是Lua语言的语句块关键字
 
 	    end
 	elseif code_id == 0xff  then
+      -- Ping server
 	    subtree:add(pf.f_md5a,buf(1,16))
 	    subtree:add(pf.f_zeros,buf(17,3))
 	    local authinfo = subtree:add(pf.f_authinfo,buf(20,16))
 	    authinfo:add(pf.f_drco,buf(20,4))
 	    authinfo:add(pf.f_serverIP,buf(24,4))
-	    authinfo:add(pf.f_unknown,buf(28,2))
+	    authinfo:add(pf.f_port,buf(28,2))
 	    authinfo:add(pf.f_clientIP,buf(30,4))
-	    authinfo:add(pf.f_unknown,buf(34,2))
-	    subtree:add_le(pf.f_uptime,buf(36,2))
-	    subtree:add_le(pf.f_alivefixed,buf(38,4))
+	    authinfo:add(pf.f_port,buf(34,2))
+      authinfo:add(pf.f_milliseconds,buf(36,2))
+      authinfo:add(pf.f_internetaccessControl,buf(38,4))
 	end
 
 	--local	dissector	= protos[0]
