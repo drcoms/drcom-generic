@@ -124,45 +124,53 @@ def keep_alive2(*args):
     import random
     ran = random.randint(0,0xFFFF)
     ran += random.randint(1,10)   
-    
-    #receive file
-    packet = keep_alive_package_builder(0,dump(ran),'\x00'*4,1,True)
-    #packet = keep_alive_package_builder(0,dump(ran),dump(ran)+'\x22\x06',1,True)
-    log('[keep-alive2] send1',packet.encode('hex'))
+    # 2014/10/15 add by latyas, maybe svr sends back a file packet
+    svr_num = 0
     while True:
+        packet = keep_alive_package_builder(svr_num,dump(ran),'\x00'*4,1,True)
+        log('[keep-alive2] send1',packet.encode('hex'))
         s.sendto(packet, (svr, 61440))
         data, address = s.recvfrom(1024)
-        if data.startswith('\x07'):
+        if data.startswith('\x07\x00\x28\x00'):
             break
+        elif data[0] == '\x07' and data[2] == '\x10':
+            log('[keep-alive2] recv file, resending..')
+            svr_num = svr_num + 1
         else:
-            log('[keep-alive2] recv/unexpected',data.encode('hex'))
+            log('[keep-alive2] recv1/unexpected',data.encode('hex'))
     log('[keep-alive2] recv1',data.encode('hex'))
     
     ran += random.randint(1,10)   
-    packet = keep_alive_package_builder(1,dump(ran),'\x00'*4,1,False)
+    packet = keep_alive_package_builder(svr_num, dump(ran),'\x00'*4,1,False)
     log('[keep-alive2] send2',packet.encode('hex'))
     s.sendto(packet, (svr, 61440))
     while True:
         data, address = s.recvfrom(1024)
         if data[0] == '\x07':
+            svr_num = svr_num + 1
             break
+        else:
+            log('[keep-alive2] recv2/unexpected',data.encode('hex'))
     log('[keep-alive2] recv2',data.encode('hex'))
     tail = data[16:20]
     
 
     ran += random.randint(1,10)   
-    packet = keep_alive_package_builder(2,dump(ran),tail,3,False)
+    packet = keep_alive_package_builder(svr_num,dump(ran),tail,3,False)
     log('[keep-alive2] send3',packet.encode('hex'))
     s.sendto(packet, (svr, 61440))
     while True:
         data, address = s.recvfrom(1024)
         if data[0] == '\x07':
+            svr_num = svr_num + 1
             break
+        else:
+            log('[keep-alive2] recv3/unexpected',data.encode('hex'))
     log('[keep-alive2] recv3',data.encode('hex'))
     tail = data[16:20]
     log("[keep-alive2] keep-alive2 loop was in daemon.")
     
-    i = 3
+    i = svr_num
     while True:
       try:
         ran += random.randint(1,10)   
