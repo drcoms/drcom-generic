@@ -296,7 +296,7 @@ def empty_socket_buffer():
     try:
         while True:
             data, address = s.recvfrom(1024)
-            log('recived sth unexcepted',data.encode('hex'))
+            log('recived sth unexpected',data.encode('hex'))
             if s == '':
                 break
     except:
