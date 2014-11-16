@@ -31,7 +31,7 @@ int __usercall SendNextDownloadModuleFileCmd<eax>(int a1<esi>, int a2)
   v9 = 40;
   v10 = 11;
   v13 = TMPcode1recExtchalleng;
-  v11 = 9999;
+  v11 = 9999; //0x270f (大端序是 0f 27)
   if ( *(_WORD *)&DownloadModuleBuff[12] )
     *((_WORD *)v15 + 3) = *(_WORD *)&DownloadModuleBuff[12];
   if ( !a2 )
