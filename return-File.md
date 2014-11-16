@@ -47,6 +47,8 @@ int __usercall SendNextDownloadModuleFileCmd<eax>(int a1<esi>, int a2)
   }
   if ( a2 == 1 )
   {
+    //&as[204]是客户端ip
+    //v15[28]是客户端ip
     *((_DWORD *)v15 + 7) = *(_DWORD *)&as[204];
     v15[5] = 3; //0b 03中那个03，现在分析的是03，所以知a2=1
   }
