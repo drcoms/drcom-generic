@@ -1,6 +1,8 @@
 发第一个82bytes的包（drcom载荷为40bytes）服务器返回一个 File 的函数名
 SendNextDownloadModuleFileCmd
 
+这个函数包括了keep_alive2的两种心跳包，这里我们主要分析第三种类型(0b 03)的包
+
 ```c
 int __usercall SendNextDownloadModuleFileCmd<eax>(int a1<esi>, int a2)
 {
@@ -109,3 +111,48 @@ int __cdecl MadeCmdPacketCRCSum(int a1, int a2)
   return (unsigned __int16)PACKET_CRC_CONST * (unsigned __int16)v4;
 }
 ```
+
+对应测试的python代码
+
+1. 原始数据
+
+    ```
+    0000   07 19 28 00 0b 03 dc 02 54 53 00 00 00 00 00 00
+    0010   5a 47 a8 00 00 00 00 00 ab fc 49 02 ac 1a 0f c4
+    0020   00 00 00 00 00 00 00 00
+    ```
+2. 先将已经算出的校验值去掉， 得到
+
+    ```
+    0000   07 19 28 00 0b 03 dc 02 54 53 00 00 00 00 00 00
+    0010   5a 47 a8 00 00 00 00 00 00 00 00 00 ac 1a 0f c4
+    0020   00 00 00 00 00 00 00 00
+    ```
+3. 编写测试脚本
+
+    ```python
+    # -*- coding: utf-8 -*-
+    """
+    Created on Mon Nov 17 03:15:03 2014
+    
+    @author: root
+    """
+    import struct
+    import re
+    from binascii import hexlify
+    a = '\x07\x19\x28\x00\x0b\x03\xdc\x02\x54\x53\x00\x00\x00\x00\x00\x00\x5a\x47\xa8\x00\x00\x00\x00\x00\x00\x00\x00\x00\xac\x1a\x0f\xc4\x00\x00\x00\x00\x00\x00\x00\x00'
+    
+    fuck = 0
+    for i in range(len(a))[::2]:
+        fuck ^= struct.unpack('H',a[i:i+2])[0]
+    
+    print hexlify(struct.pack('I', fuck * 711))
+    ```
+4. 结果检验
+
+    ```
+    >>> runfile('untitled0.py')
+    abfc4902
+    ```
+    
+    正好与原来校验值相同
