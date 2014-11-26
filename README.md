@@ -2,11 +2,14 @@
 
 资料导航
 ---------------------
+[最新客户端(d版)](https://github.com/drcoms/generic/blob/master/latest-wired.py) <br>
+[最新客户端_pppoe版(p版)](https://github.com/drcoms/generic/blob/master/latest-pppoe.py) <br>
+[最新客户端_802.1x版(x版)](https://github.com/drcoms/drcom8021x) <br>
 [最新客户端](https://github.com/drcoms/generic/blob/master/latest-wired.py) <br>
 [登录之后服务器返回错误信息](https://github.com/drcoms/generic/blob/master/errorno.md) <br>
 [四步心跳分析(尤其是第三步心跳)](https://github.com/drcoms/generic/blob/master/heart-beats.md) <br>
 [登录包](https://github.com/drcoms/generic/blob/master/login.md) <br>
-[pppoe心跳包分析【未解决】](https://github.com/drcoms/generic/blob/master/pppoe.md) <br>
+[pppoe心跳包分析【未完美解决】](https://github.com/drcoms/generic/blob/master/pppoe.md) <br>
 [自用drcom_2011.lua](https://github.com/drcoms/generic/blob/master/drcom_2011.lua)
 
 
