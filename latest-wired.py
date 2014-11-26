@@ -75,7 +75,7 @@ def keep_alive_package_builder(number,random,tail,type=1,first=False):
     if first :
       data += '\x0f\x27'
     else:
-      data += '\xdc\02'
+      data += '\xdc\x02'
     data += '\x2f\x12' + '\x00' * 6
     data += tail
     data += '\x00' * 4
@@ -126,7 +126,7 @@ def keep_alive2(*args):
         elif data[0] == '\x07' and data[2] == '\x10':
             log('[keep-alive2] recv file, resending..')
             svr_num = svr_num + 1
-            packet = keep_alive_package_builder(svr_num,dump(ran),'\x00'*4,1,False)
+            packet = keep_alive_package_builder(svr_num,dump(ran),'\x00'*4,svr_num,False)
         else:
             log('[keep-alive2] recv1/unexpected',data.encode('hex'))
     log('[keep-alive2] recv1',data.encode('hex'))
