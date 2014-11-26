@@ -1,4 +1,4 @@
-本页面仅供drcom客户端开发的童鞋有价值，需要有一些相关的知识。
+本页面仅供drcom客户端开发的童鞋有价值，需要有一些相关的知识。有关drcom所有项目仅供研究使用，由滥用造成的法律后果与作者无关。
 
 资料导航
 ---------------------
@@ -16,29 +16,37 @@
 [pppoe心跳包分析【未完美解决】](https://github.com/drcoms/generic/blob/master/pppoe.md) <br>
 [自用drcom_2011.lua](https://github.com/drcoms/generic/blob/master/drcom_2011.lua)
 
+吉林大学用户
+------------------
+由于这个sb学校的特殊性，请使用 https://github.com/ly0/jlu-drcom-client 里的客户端
+（U62协议中带了dhcp_option，这是其他学校没有的）
+
+PPPOE用户注意
+------------------
+你应该会注意到脚本中有两个需要修改的地方 `pppoe_flag` 和 `keep_alive2_flag` 不明白是什么意思, 这里说明怎么修改这两个值
+
+#### pppoe_flag
+![image](https://raw.githubusercontent.com/drcoms/generic/master/images/pppoe1.jpg)
+
+#### keep_alive2_flag
+![image](https://raw.githubusercontent.com/drcoms/generic/master/images/pppoe2.jpg)
+
 
 关于版本号对应的字段
 -------------------
-位置在 +148 处
-对应本文代码的
+在 d 版和 x 版的 drcom 认证脚本部分中找到类似于这样的代码
 
 ```python
 data += '\x0a\x00' # for u64, \x1a\x00
 ```
 
-尚且不知道第二个字节是什么东西，所以只考虑第一个字节
+第一个字节与版本有关，目前已知的一些
 
 * U60: 0x09
 * U60R0: 0x0a
 * U64: 0x1a
 
-该数值应该随着版本号递增
-
-
-吉林大学用户
-------------------
-由于这个sb学校的特殊性，请使用 https://github.com/ly0/jlu-drcom-client 里的客户端
-（U62协议中带了dhcp_option，这是其他学校没有的）
+最简单自己寻找的方式就是截个包，看看最后大约20字节以内的位置上的类似部分，确定这个值。
 
 drcom_2011.lua
 ---------------------
