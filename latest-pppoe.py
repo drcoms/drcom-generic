@@ -21,7 +21,7 @@ pppoe_flag = '\x00'
 # either \xdc or \xd8 is available
 keep_alive2_flag = '\xdc'
 host_ip = server
-DEBUG = True #log saves to file
+DEBUG = False #log saves to file
 LOG_PATH = 'drcom_client.log'
 
 def log(*args, **kwargs):
@@ -100,7 +100,7 @@ class PPPOEHeartbeat:
           ret &= 0xFFFFFFFF
       return ret
 
-    def _make_heartbeat(self, sip, challenge_seed, first=True):
+    def _make_heartbeat(self, sip, challenge_seed, first=False):
         # DrcomDialExtProtoHeader - 5 bytes
         data = '\x07' # code
         data += chr(self.count) # id
@@ -128,14 +128,13 @@ class PPPOEHeartbeat:
         return data
 
     def send(self, s):
-        socket.setdefaulttimeout(1)
         while True:
             #1. challenge
             data = self._make_challenge()
-            log('send challenge request', pkt=data)
+            log('pppoe: send challenge request', pkt=data)
             s.send(data)
             data, address = s.recv()
-            log('received challenge response', pkt=data)
+            log('pppoe: received challenge response', pkt=data)
 
             self.count += 1
             self.count %= 0xFF
@@ -143,20 +142,24 @@ class PPPOEHeartbeat:
             #2. heartbeat
             seed = data[8:12]
             sip = data[12:16]
-            data = self._make_heartbeat(sip=sip, challenge_seed=seed)
-            log('send heartbeat request', pkt=data)
+            if self.count != 2 and self.count != 1:
+                data = self._make_heartbeat(sip=sip, challenge_seed=seed)
+            else:
+                data = self._make_heartbeat(sip=sip, challenge_seed=seed, first=True)
+            log('pppoe: send heartbeat request', pkt=data)
             s.send(data)
             try:
                 data, address = s.recv()
-                log('received heartbeat response', pkt=data)
+                log('pppoe: received heartbeat response', pkt=data)
                 break
             except:
-                log('heartbeat response failed, retry', pkt=data)
+                log('pppoe: heartbeat response failed, retry')
+                log('pppoe: reset idx to 0x01')
+                self.count = 1
                 continue
 
             self.count += 1
             self.count %= 0xFF
-        socket.setdefaulttimeout(3)
 
 
 def keep_alive_package_builder(number,random,tail,type=1,first=False):
