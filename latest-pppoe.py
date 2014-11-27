@@ -1,4 +1,10 @@
 #coding=utf-8
+"""
+I want to express my thanks to the following friends (in QQ Group 318495368)
+
+@Countdown to Heaven
+@djj
+"""
 import socket
 import struct
 import time
