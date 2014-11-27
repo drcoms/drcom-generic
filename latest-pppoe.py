@@ -12,21 +12,30 @@ import time
 from hashlib import md5
 import sys
 import random
+import platform
 import os
 
 server = '61.142.108.96'
+# if \x00 does not work, try \x18, \xd8 or real value in the packet which captured by your wireshark
 pppoe_flag = '\x00'
-keep_alive2_flag = '\xd8'
+# either \xdc or \xd8 is available
+keep_alive2_flag = '\xdc'
 host_ip = server
-DEBUG = False #log saves to file
+DEBUG = True #log saves to file
 LOG_PATH = 'drcom_client.log'
 
 def log(*args, **kwargs):
     s = ' '.join(args)
+    if 'pkt' in kwargs and DEBUG == True:
+        s += '\n\tpacket:' + kwargs['pkt'].encode('hex')
     print '[*] ', s
     if DEBUG:
-      with open(LOG_PATH,'a') as f:
-          f.write(s + '\n')
+      with open(LOG_PATH,'ab') as f:
+          try:
+              f.write(s)
+              f.write('\n')
+          except:
+              f.write('FUCK WINDOWS' + '\n')
 
 def dump(n):
     s = '%x' % n
@@ -34,14 +43,22 @@ def dump(n):
         s = '0' + s
     return s.decode('hex')
 
+def gbk2utf8(string):
+    if platform.uname()[0] != 'Windows':
+        return string.decode('gb2312').encode().decode()
+    else:
+        return string.decode('gb2312')
+
 class Socket:
 
     def __init__(self, server, port=61440):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.s.bind(("0.0.0.0", 61440))
         log("open local port:" + str(port))
+        log("DEBUG MODE:"+ str(DEBUG))
         self.server = server
         self.port = port
+        self.s.settimeout(3)
 
     def send(self, data):
         self.s.sendto(data, (self.server, self.port))
@@ -50,10 +67,9 @@ class Socket:
         while True:
             data, address = self.s.recvfrom(1024)
             if data[0] == '\x4d':
-                log('received message packet, dropped')
+                log('received message packet, dropped. message:' + gbk2utf8(data[4:]))
                 continue
-            break
-        return data, address
+            return data, address
 
     def get_socket(self):
         return self.s
@@ -116,28 +132,30 @@ class PPPOEHeartbeat:
         while True:
             #1. challenge
             data = self._make_challenge()
-            print '[*] send challenge request'
+            log('send challenge request', pkt=data)
             s.send(data)
             data, address = s.recv()
-            print '[*] received challenge response'
+            log('received challenge response', pkt=data)
 
             self.count += 1
-
+            self.count %= 0xFF
+            
             #2. heartbeat
             seed = data[8:12]
             sip = data[12:16]
             data = self._make_heartbeat(sip=sip, challenge_seed=seed)
-            print '[*] send heartbeat request'
+            log('send heartbeat request', pkt=data)
             s.send(data)
             try:
                 data, address = s.recv()
-                print '[*] received heartbeat response'
+                log('received heartbeat response', pkt=data)
                 break
             except:
-                print '[*] heartbeat response failed'
+                log('heartbeat response failed, retry', pkt=data)
                 continue
 
             self.count += 1
+            self.count %= 0xFF
         socket.setdefaulttimeout(3)
 
 
@@ -174,7 +192,7 @@ def keep_alive2(s, pppoe):
     svr_num = 0
     packet = keep_alive_package_builder(svr_num,dump(ran),'\x00'*4,1,True)
     while True:
-        log('[keep-alive2] send1',packet.encode('hex'))
+        log('[keep-alive2] send1', pkt=packet)
         s.sendto(packet, (svr, 61440))
         data, address = s.recvfrom(1024)
         if data[0] == '\x07' and data[2] == '\x28':
@@ -184,12 +202,12 @@ def keep_alive2(s, pppoe):
             svr_num = svr_num + 1
             packet = keep_alive_package_builder(svr_num,dump(ran),'\x00'*4,svr_num,False)
         else:
-            log('[keep-alive2] recv1/unexpected',data.encode('hex'))
-    log('[keep-alive2] recv1',data.encode('hex'))
+            log('[keep-alive2] recv1/unexpected', pkt=data)
+    log('[keep-alive2] recv1', pkt=data)
     
     ran += random.randint(1,10)   
     packet = keep_alive_package_builder(svr_num, dump(ran),'\x00'*4,1,False)
-    log('[keep-alive2] send2',packet.encode('hex'))
+    log('[keep-alive2] send2', pkt=packet)
     s.sendto(packet, (svr, 61440))
     while True:
         data, address = s.recvfrom(1024)
@@ -197,14 +215,14 @@ def keep_alive2(s, pppoe):
             svr_num = svr_num + 1
             break
         else:
-            log('[keep-alive2] recv2/unexpected',data.encode('hex'))
-    log('[keep-alive2] recv2',data.encode('hex'))
+            log('[keep-alive2] recv2/unexpected', pkt=data)
+    log('[keep-alive2] recv2', pkt=data)
     tail = data[16:20]
     
 
     ran += random.randint(1,10)   
     packet = keep_alive_package_builder(svr_num,dump(ran),tail,3,False)
-    log('[keep-alive2] send3',packet.encode('hex'))
+    log('[keep-alive2] send3', pkt=packet)
     s.sendto(packet, (svr, 61440))
     while True:
         data, address = s.recvfrom(1024)
@@ -212,8 +230,8 @@ def keep_alive2(s, pppoe):
             svr_num = svr_num + 1
             break
         else:
-            log('[keep-alive2] recv3/unexpected',data.encode('hex'))
-    log('[keep-alive2] recv3',data.encode('hex'))
+            log('[keep-alive2] recv3/unexpected', pkt=data)
+    log('[keep-alive2] recv3', pkt=data)
     tail = data[16:20]
     log("[keep-alive2] keep-alive2 loop was in daemon.")
     
@@ -222,18 +240,18 @@ def keep_alive2(s, pppoe):
       try:
         ran += random.randint(1,10)   
         packet = keep_alive_package_builder(i,dump(ran),tail,1,False)
-        log('[keep_alive2] send',str(i),packet.encode('hex'))
+        log('[keep_alive2] send',str(i), pkt=packet)
         s.sendto(packet, (svr, 61440))
         data, address = s.recvfrom(1024)
-        log('[keep_alive2] recv',data.encode('hex'))
+        log('[keep_alive2] recv', pkt=data)
         tail = data[16:20]
         
         ran += random.randint(1,10)   
         packet = keep_alive_package_builder(i+1,dump(ran),tail,3,False)
         s.sendto(packet, (svr, 61440))
-        log('[keep_alive2] send',str(i+1),packet.encode('hex'))
+        log('[keep_alive2] send',str(i+1), pkt=packet)
         data, address = s.recvfrom(1024)
-        log('[keep_alive2] recv',data.encode('hex'))
+        log('[keep_alive2] recv', pkt=data)
         tail = data[16:20]
         i = (i+2) % 0xFF
         time.sleep(10)
