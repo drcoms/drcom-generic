@@ -1,6 +1,7 @@
 #coding=utf-8
 """
-I want to express my thanks to the following friends (in QQ Group 318495368)
+I want to express my great thanks to the following friends
+they brought me hope of this version (in QQ Group 318495368)
 
 @Countdown to Heaven
 @djj
