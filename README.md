@@ -23,7 +23,6 @@
 吉林大学用户
 ------------------
 由于这个sb学校的特殊性，请使用 https://github.com/ly0/jlu-drcom-client 里的客户端
-（U62协议中带了dhcp_option，这是其他学校没有的）
 
 PPPOE用户注意
 ------------------
