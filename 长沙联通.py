@@ -4,7 +4,6 @@ import socket, struct, time
 from hashlib import md5
 import sys
 import os
-import urllib2
 
 class ChallengeException (Exception):
   def __init__(self):
