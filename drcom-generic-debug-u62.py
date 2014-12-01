@@ -126,8 +126,8 @@ def keep_alive2(*args):
     ran += random.randint(1,10)   
     # 2014/10/15 add by latyas, maybe svr sends back a file packet
     svr_num = 0
+    packet = keep_alive_package_builder(svr_num,dump(ran),'\x00'*4,1,True)
     while True:
-        packet = keep_alive_package_builder(svr_num,dump(ran),'\x00'*4,1,True)
         log('[keep-alive2] send1',packet.encode('hex'))
         s.sendto(packet, (svr, 61440))
         data, address = s.recvfrom(1024)
@@ -135,6 +135,7 @@ def keep_alive2(*args):
             break
         elif data[0] == '\x07' and data[2] == '\x10':
             log('[keep-alive2] recv file, resending..')
+            packet = keep_alive_package_builder(svr_num,dump(ran),'\x00'*4,1, False)
             svr_num = svr_num + 1
         else:
             log('[keep-alive2] recv1/unexpected',data.encode('hex'))
