@@ -135,8 +135,8 @@ def keep_alive2(*args):
             break
         elif data[0] == '\x07' and data[2] == '\x10':
             log('[keep-alive2] recv file, resending..')
-            packet = keep_alive_package_builder(svr_num,dump(ran),'\x00'*4,1, False)
             svr_num = svr_num + 1
+            packet = keep_alive_package_builder(svr_num,dump(ran),'\x00'*4,1, False)
         else:
             log('[keep-alive2] recv1/unexpected',data.encode('hex'))
     log('[keep-alive2] recv1',data.encode('hex'))
