@@ -121,7 +121,7 @@ def keep_alive2(*args):
         log('[keep-alive2] send1',packet.encode('hex'))
         s.sendto(packet, (svr, 61440))
         data, address = s.recvfrom(1024)
-        if data.startswith('\x07\x00\x28\x00'):
+        if data.startswith('\x07\x00\x28\x00') or data.startswith('\x07' + chr(svr_num)  + '\x28\x00'):
             break
         elif data[0] == '\x07' and data[2] == '\x10':
             log('[keep-alive2] recv file, resending..')
