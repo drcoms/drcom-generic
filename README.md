@@ -27,6 +27,10 @@
 
 PPPOE用户注意
 ------------------
+首先 p 版用户只需要丢两个文件到路由器里 <br>
+*pppoe.sh* 和 *latest-pppoe.py*，都丢进 */usr/bin* 里，并后者改名为 *drcom-pppoe.py*, 然后给 *pppoe.sh* 加执行权限
+
+
 你应该会注意到脚本中有两个需要修改的地方 `pppoe_flag` 和 `keep_alive2_flag` 不明白是什么意思, 这里说明怎么修改这两个值
 
 #### pppoe_flag
