@@ -3,6 +3,7 @@ import socket, struct, time
 from hashlib import md5
 import sys
 import os
+import random
 
 class ChallengeException (Exception):
   def __init__(self):
@@ -17,11 +18,33 @@ s.bind(("0.0.0.0", 61440))
 
 s.settimeout(3)
 SALT = ''
+IS_TEST = False
+# specified fields based on version
+KEEP_ALIVE_FILE = '\x0f\x27'
+KEEP_ALIVE_VERSION = '\xdc\x02'
+AUTH_VERSION = '\x0a\x00'
 CONF = "/etc/drcom.conf"
+if IS_TEST:
+    CONF = ''
 UNLIMITED_RETRY = True
 EXCEPTION = False
 DEBUG = False #log saves to file
 LOG_PATH = '/var/log/drcom_client.log'
+if IS_TEST:
+    DEBUG = True
+    LOG_PATH = 'drcom_client.log'
+
+# if IS_TEST was set to True, you have to configure following things
+if IS_TEST:
+    # basic configuration
+    server = "192.168.100.150" # Auth server ip
+    username = ""
+    password = ""
+    host_name = "LIYUANYUAN"
+    host_os = "8089D"
+    host_ip = "10.30.22.17" # your ip, the server wouldn't check this, so it's a nonsense 
+    dhcp_server = "0.0.0.0"
+    mac = 0xb888e3051680
 
 
 def log(*args, **kwargs):
@@ -73,9 +96,9 @@ def ror(md5, pwd):
 def keep_alive_package_builder(number,random,tail,type=1,first=False):
     data = '\x07'+ chr(number) + '\x28\x00\x0b' + chr(type)
     if first :
-      data += '\x0f\x27'
+      data += KEEP_ALIVE_FILE
     else:
-      data += '\xdc\x02'
+      data += KEEP_ALIVE_VERSION
     data += '\x2f\x12' + '\x00' * 6
     data += tail
     data += '\x00' * 4
@@ -111,7 +134,6 @@ def keep_alive2(*args):
     tail = ''
     packet = ''
     svr = server
-    import random
     ran = random.randint(0,0xFFFF)
     ran += random.randint(1,10)   
     # 2014/10/15 add by latyas, maybe svr sends back a file packet
@@ -230,7 +252,7 @@ def mkpkt(salt, usr, pwd, mac):
     #data += '\x01' + host_os.ljust(128, '\x00')
     #data += '\x0a\x00\x00'+chr(len(pwd)) # \0x0a represents version of client, algorithm: DRCOM_VER + 100
     #data += ror(md5sum('\x03\x01'+salt+pwd), pwd)
-    data += '\x0a\x00'
+    data += AUTH_VERSION
     data += '\x02\x0c'
     data += checksum(data+'\x01\x26\x07\x11\x00\x00'+dump(mac))
     data += '\x00\x00' #delimeter
@@ -309,8 +331,9 @@ def daemon():
         f.write(str(os.getpid()))
         
 def main():
-    daemon()
-    execfile(CONF, globals())
+    if not IS_TEST:
+        daemon()
+        execfile(CONF, globals())
     log("auth svr:"+server+"\nusername:"+username+"\npassword:"+password+"\nmac:"+str(hex(mac)))
     while True:
       try:
@@ -321,7 +344,6 @@ def main():
       #keep_alive1 is fucking bullshit!
       empty_socket_buffer()
       keep_alive1(SALT,package_tail,password,server)
-      #empty_socket_buffer()
       keep_alive2(SALT,package_tail,password,server)
 if __name__ == "__main__":
     main()
