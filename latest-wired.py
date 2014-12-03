@@ -5,6 +5,22 @@ import sys
 import os
 import random
 
+# CONFIG
+server = "192.168.100.150"
+username = ""
+password = ""
+host_name = "LIYUANYUAN"
+host_os = "8089D"
+host_ip = "10.30.22.17" 
+dhcp_server = "0.0.0.0"
+mac = 0xb888e3051680
+CONTROLCHECKSTATUS = '\x20'
+ADAPTERNUM = '\x01'
+KEEP_ALIVE_VERSION = '\xdc\x02'
+AUTH_VERSION = '\x0a\x00'
+IPDOG = '\x01'
+# CONFIG_END
+
 class ChallengeException (Exception):
   def __init__(self):
     pass
@@ -12,7 +28,7 @@ class ChallengeException (Exception):
 class LoginException (Exception):
   def __init__(self):
     pass
-   
+
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.bind(("0.0.0.0", 61440))
 
@@ -20,9 +36,6 @@ s.settimeout(3)
 SALT = ''
 IS_TEST = False
 # specified fields based on version
-KEEP_ALIVE_FILE = '\x0f\x27'
-KEEP_ALIVE_VERSION = '\xdc\x02'
-AUTH_VERSION = '\x0a\x00'
 CONF = "/etc/drcom.conf"
 if IS_TEST:
     CONF = ''
@@ -33,18 +46,6 @@ LOG_PATH = '/var/log/drcom_client.log'
 if IS_TEST:
     DEBUG = True
     LOG_PATH = 'drcom_client.log'
-
-# if IS_TEST was set to True, you have to configure following things
-if IS_TEST:
-    # basic configuration
-    server = "192.168.100.150" # Auth server ip
-    username = ""
-    password = ""
-    host_name = "LIYUANYUAN"
-    host_os = "8089D"
-    host_ip = "10.30.22.17" # your ip, the server wouldn't check this, so it's a nonsense 
-    dhcp_server = "0.0.0.0"
-    mac = 0xb888e3051680
 
 
 def log(*args, **kwargs):
@@ -96,7 +97,7 @@ def ror(md5, pwd):
 def keep_alive_package_builder(number,random,tail,type=1,first=False):
     data = '\x07'+ chr(number) + '\x28\x00\x0b' + chr(type)
     if first :
-      data += KEEP_ALIVE_FILE
+      data += '\x0f\x27'
     else:
       data += KEEP_ALIVE_VERSION
     data += '\x2f\x12' + '\x00' * 6
@@ -224,8 +225,8 @@ def mkpkt(salt, usr, pwd, mac):
     data = '\x03\x01\x00'+chr(len(usr)+20)
     data += md5sum('\x03\x01'+salt+pwd)
     data += usr.ljust(36, '\x00')
-    data += '\x20' #fixed unknow 1
-    data += '\x02' #unknow 2
+    data += CONTROLCHECKSTATUS
+    data += ADAPTERNUM
     data += dump(int(data[4:10].encode('hex'),16)^mac).rjust(6,'\x00') #mac xor md51
     data += md5sum("\x01" + pwd + salt + '\x00'*4) #md52
     data += '\x01' # number of ip
@@ -235,7 +236,7 @@ def mkpkt(salt, usr, pwd, mac):
     data += '\00'*4 #your ipaddress 3
     data += '\00'*4 #your ipaddress 4
     data += md5sum(data + '\x14\x00\x07\x0b')[:8] #md53
-    data += '\x01' #ipdog
+    data += IPDOG
     data += '\x00'*4 #delimeter
     data += host_name.ljust(32, '\x00')
     data += '\x08\x08\x08\x08' #primary dns: 8.8.8.8
@@ -347,4 +348,3 @@ def main():
       keep_alive2(SALT,package_tail,password,server)
 if __name__ == "__main__":
     main()
-
