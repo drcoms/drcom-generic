@@ -20,7 +20,8 @@ text = f.read()
 offset = re.search('\xf0\x00\xf0\x00....\x03\x01', text).start() + 8
 #print hexlify(text[offset:offset+330])
 print 'pcapng file:', filename
-print '# copy following statements to drcom.conf or overwrite field between "# CONFIG" and "# CONFIG_END" in latest-wired.py'
+print 'copy following statements to drcom.conf or overwrite field between "# CONFIG" and "# CONFIG_END" in latest-wired.py'
+print '\n'
 username_len = ord(text[offset+3]) - 20
 username = text[offset+20:offset+20+username_len]
 print 'server = \'%s\'' % '.'.join([str(ord(i)) for i in text[offset-12:offset-8]])
