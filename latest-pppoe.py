@@ -16,9 +16,7 @@ import platform
 import os
 
 server = '61.142.108.96'
-# if \x00 does not work, try \x18, \xd8 or real value in the packet which captured by your wireshark
 pppoe_flag = '\x00'
-# either \xdc or \xd8 is available
 keep_alive2_flag = '\xdc'
 host_ip = server
 DEBUG = False #log saves to file
