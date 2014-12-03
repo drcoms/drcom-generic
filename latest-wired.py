@@ -1,4 +1,4 @@
-# TESTED: u62R0 without 802.1x
+#!/usr/bin/python
 import socket, struct, time
 from hashlib import md5
 import sys
