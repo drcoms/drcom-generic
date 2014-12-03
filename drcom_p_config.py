@@ -22,4 +22,4 @@ offset = re.search('\xf0\x00\xf0\x00....\x07.\x60\x00\x03\x00', text).start() + 
 print 'pppoe_flag = \'%s\'' % hexed(text[offset+19])
 keep_alive2_flag = re.search('\xf0\x00\xf0\x00....\x07.\x5c\x28\x00\x0b\x03(.)\x02', text).group(1)
 #print hexlify(text[offset:offset+330])
-print 'pppoe_flag = \'%s\'' % hexed(keep_alive2_flag)
+print 'keep_alive2_flag = \'%s\'' % hexed(keep_alive2_flag)
