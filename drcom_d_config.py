@@ -17,7 +17,7 @@ def hexed(s):
 filename = 'dr.pcapng'
 f = open(filename, 'rb')
 text = f.read()
-offset = re.search('\xf0\x00\xf0\x00....\x03\x01', text).start() + 8
+offset = re.search('\xf0\x00\xf0\x00[\x00-\xFF]{4}\x03\x01', text).start() + 8
 #print hexlify(text[offset:offset+330])
 print 'pcapng file:', filename
 print 'copy following statements to drcom.conf or overwrite field between "# CONFIG" and "# CONFIG_END" in latest-wired.py'
@@ -32,7 +32,7 @@ print 'ADAPTERNUM = \'%s\'' % hexed(text[offset+57])
 print 'host_ip = \'%s\'' % '.'.join(map(lambda x: str(ord(x)), text[offset+81:offset+85]))
 print 'IPDOG = \'%s\'' % hexed(text[offset+105])
 print 'host_name = \'%s\'' % 'DRCOMFUCKER'
-print 'PRIMARY_DNS = \'%s\'' % hexed(text[offset+142 :offset+146])
+print 'PRIMARY_DNS = \'%s\'' % '.'.join(map(lambda x: str(ord(x)), text[offset+142 :offset+146]))
 print 'dhcp_server = \'%s\'' % '.'.join(map(lambda x: str(ord(x)), text[offset+146:offset+150]))
 print 'AUTH_VERSION = \'%s\'' % hexed(text[offset+310:offset+312])
 print 'mac = 0x%s' % hexlify(text[offset+320:offset+326])
