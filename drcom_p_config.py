@@ -17,7 +17,7 @@ def hexed(s):
 filename = 'drp.pcapng'
 f = open(filename, 'rb')
 text = f.read()
-offset = re.search('\x07.\x60\x00\x03\x00', text).start()
+offset = re.search('\x07[\x00-\xFF]\x60\x00\x03\x00', text).start()
 #print hexlify(text[offset:offset+330])
 print 'server = \'%s\'' % '.'.join([str(ord(i)) for i in text[offset-12:offset-8]])
 print 'pppoe_flag = \'%s\'' % hexed(text[offset+19])
