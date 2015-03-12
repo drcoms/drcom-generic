@@ -3,8 +3,8 @@
 START=99
 APP="python /usr/bin/drcom.py" 
 start() {
-	sleep 5
-	start-stop-daemon -S -x $APP
+	sleep 30
+	start-stop-daemon --start --background --exec $APP
 }
 
 stop() {
