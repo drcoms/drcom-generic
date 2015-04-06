@@ -1,10 +1,10 @@
 #coding=UTF-8
 #test version 
-#Licensed under the AGPLv3
+#Licensed under the GPL
 #thx all authors before
 
 
-import socket, struct, time,random,re
+import socket, struct, time,sys,urllib2,random,re,uuid
 from hashlib import md5
 
 #config
@@ -12,27 +12,18 @@ server = '10.1.1.10'
 username=''
 password=''
 CONTROLCHECKSTATUS = '\x20'
-ADAPTERNUM = '\x07'
-host_ip = '10.100.95.74'
+ADAPTERNUM = '\x03'
+host_ip = '10.50.23.19'
 IPDOG = '\x01'
-host_name = 'DRCOMGOAWAY'
-PRIMARY_DNS = '114.114.114.114'
-dhcp_server = '0.0.0.0'
-AUTH_VERSION = '\x1f\x00'
-mac = 0x000000000000
+host_name = 'DRCOMFUCKER'
+PRIMARY_DNS = '202.102.192.68'
+dhcp_server = '10.50.23.254'
+AUTH_VERSION = '\x22\x00'
+mac = 0x20689df3d066
 host_os = 'WINDIAOS'
-KEEP_ALIVE_VERSION = '\x0f\x27'
-
+KEEP_ALIVE_VERSION = '\xdc\x02'
 #config_end
 
-class ChallengeException (Exception):
-  def __init__(self):
-    pass
-
-class loginException (Exception):
-  def __init__(self):
-    pass
-	
 def try_socket():
 #sometimes cannot get the port
 	global s,salt
@@ -41,34 +32,27 @@ def try_socket():
 		s.bind(("0.0.0.0", 61440))
 		s.settimeout(3)
 	except:
-		print ".",
-		time.sleep(0.5)
-		print ".",
-		time.sleep(0.5)
-		print "."
-		time.sleep(0.5)
-		print "...reopen"
-		time.sleep(10)
-		sys.exit(0)
+		i=0
+		print ">Error!<"
+		print">Cannot get the right port,this programm  may cannot auth right<"
+		print">Wait for 5 seconds<"
+		time.sleep(5)
 	else:
 		SALT= ''
 
+
+		
 UNLIMITED_RETRY = True
 EXCEPTION = False
 	
-def get_randmac():
-	mac = [ 0x00, 0x16, 0x3e,random.randint(0x00, 0x7f),random.randint(0x00, 0xff),random.randint(0x00, 0xff) ]
-	return ''.join(map(lambda x: "%02x" % x, mac))
-	#print randomMAC()
 	
 def version():
 	print "=====================================================================" 
-	print "DrCOM Auth Router for u6x" 
+	print "DrCOM Auth Router for 3.5+" 
+	print "Version Apr.6.d"
 	print "with keep-alive1&keep-alive2"
 	print "=====================================================================" 
-	
 
-	
 	
 def challenge(svr,ran):
     while True:
@@ -76,7 +60,6 @@ def challenge(svr,ran):
       s.sendto("\x01\x02"+t+"\x09"+"\x00"*15, (svr, 61440))
       try:
         data, address = s.recvfrom(1024)
-        #print('[challenge] recv',data.encode('hex'))
       except:
         print('[challenge] timeout, retrying...')
         continue
@@ -85,10 +68,8 @@ def challenge(svr,ran):
         break
       else:
         continue
-    #print('[DEBUG] challenge:\n' + data.encode('hex'))
     if data[0] != '\x02':
       raise ChallengeException
-    print('[challenge] challenge packet sent.')
     return data[4:8]
 
 def md5sum(s):
@@ -111,7 +92,11 @@ def ror(md5, pwd):
 
 def keep_alive_package_builder(number,random,tail,type=1,first=False):
     data = '\x07'+ chr(number) + '\x28\x00\x0b' + chr(type)
-    data += KEEP_ALIVE_VERSION+'\x2f\x12' + '\x00' * 6
+    if first :
+      data += '\x0f\x27'
+    else:
+      data += KEEP_ALIVE_VERSION
+    data += '\x2f\x12' + '\x00' * 6
     data += tail
     data += '\x00' * 4
     #data += struct.pack("!H",0xdc02)
@@ -220,8 +205,8 @@ def mkpkt(salt, usr, pwd, mac):
     data = '\x03\x01\x00'+chr(len(usr)+20)
     data += md5sum('\x03\x01'+salt+pwd)
     data += usr.ljust(36, '\x00')
-    data += '\x20' #fixed unknow 1
-    data += '\x02' #unknow 2
+    data += CONTROLCHECKSTATUS
+    data += ADAPTERNUM
     data += dump(int(data[4:10].encode('hex'),16)^mac).rjust(6,'\x00') #mac xor md51
     data += md5sum("\x01" + pwd + salt + '\x00'*4) #md52
     data += '\x01' #NIC count
@@ -230,7 +215,7 @@ def mkpkt(salt, usr, pwd, mac):
     data += '\00'*4 #your ipaddress 3
     data += '\00'*4 #your ipaddress 4
     data += md5sum(data + '\x14\x00\x07\x0b')[:8] #md53
-    data += '\x01' #ipdog
+    data +=IPDOG
     data += '\x00'*4 #delimeter
     data += host_name.ljust(32, '\x00')
     data += '\x72\x72\x72\x72' #primary dns: 114.114.114.114
@@ -340,11 +325,9 @@ def check_online():
 
 		
 def main():
-	global server,username,password,host_name,host_os,dhcp_server,mac,hexip,host_ip
+	global hexip,host_ip
+	#host_ip=socket.gethostbyname(socket.gethostname())
 	hexip=socket.inet_aton(host_ip)
-	#host_ip=ip
-	host_name = "est-pc"
-	host_os = "8089D"   #default is 8089D
 	dhcp_server = "0.0.0.0"
 	#mac = 0xE0DB55BAE012 
 	#it is a mac in programme and it may crush with other users so I use randMAC to avoid it
@@ -362,7 +345,7 @@ def loginpart():
 		
 def keeppart():
 	#empty_socket_buffer()
-	#empty_socket_buffer()
+	keep_alive1(SALT,package_tail,password,server)
 	keep_alive2(SALT,package_tail,password,server)
 
 		
