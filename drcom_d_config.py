@@ -14,7 +14,7 @@ def hexed(s):
         ret += '\\x' + hex(ord(i))[2:].rjust(2, '0')
     return ret
 
-filename = 'dr.pcapng'
+filename = '998'
 f = open(filename, 'rb')
 text = f.read()
 offset = re.search('\xf0\x00\xf0\x00[\x00-\xFF]{4}\x03\x01', text).start() + 8
@@ -39,5 +39,5 @@ print 'mac = 0x%s' % hexlify(text[offset+320:offset+326])
 print 'host_os = \'%s\'' % 'WINDIAOS'
 
 # now get the version field in heartbeat
-KEEP_ALIVE_VERSION = re.search('\xf0\x00\xf0\x00....\x07.\x5c\x28\x00\x0b\x01(..)', text).group(1)
+KEEP_ALIVE_VERSION = [i for i in re.findall('\xf0\x00\xf0\x00....\x07.\x5c\x28\x00\x0b\x01(..)', text) if i != '\x0f\x27'][0]
 print 'KEEP_ALIVE_VERSION = \'%s\'' % hexed(KEEP_ALIVE_VERSION)
