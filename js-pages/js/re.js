@@ -1,0 +1,105 @@
+'use strict';
+
+var params;
+
+$(document).ready(function (){
+	$('#file-upload').click(function(){
+		fileupload(function(file) {
+		if (file) {
+			var reader = new FileReader();
+			reader.onload = function(e) {
+				var data = e.target.result;
+				// alert(data);
+				// document.getElementById('test').innerHTML = data;
+				params = re_d(data);
+			}
+			reader.readAsText(file, 'utf-16be');
+		}
+	}, '.pcapng');
+	});
+	$('#config-generate').click(function(){
+		var gen = '';
+		for (var i = 0; i < params[0].length; i++) {
+			gen += (params[0][i] + ' = ' + params[1][i] + '\n');
+		};
+		gen = gen.slice(0, -1);
+		var blob = new Blob([gen], {type: "text/plain;charset=utf-8"});
+		saveAs(blob, 'drcom.conf');
+	});
+});
+
+function fileupload (callback, accept) {
+	var fileSelector = $('<input type="file">');
+	if (accept) fileSelector.attr('accept', accept);
+	fileSelector.change(function() {
+		var files = fileSelector[0].files;
+		if (files.length) {
+			callback(files[0]);
+		} else {
+			callback(null);
+		}
+	});
+	fileSelector.click();
+}
+
+String.prototype.hexEncode = function(){
+	var hex, i;
+	var result = "";
+	for (i=0; i<this.length; i++) {
+		hex = this.charCodeAt(i).toString(16);
+		result += ("000"+hex).slice(-4);
+	}
+	return result
+}
+
+String.prototype.hex2a = function(){
+	var str = '';
+	for (var i = 0; i < this.length; i += 2)
+		str += String.fromCharCode(parseInt(this.substr(i, 2), 16));
+	return str;
+}
+
+String.prototype.hex2o = function(){
+    var str = '';
+    for (var i = 0; i < this.length; i += 2)
+        str += (parseInt(this.substr(i, 2), 16) + '.');
+    return str;
+}
+
+function re_d (text) {
+	text = text.hexEncode();
+	var re1 = /f000f000[00-ff]{8}0301/;
+	var r1 = text.match(re1);
+	var offset = text.indexOf(r1) + 16;
+	// document.getElementById('test').innerHTML = offset;
+	// ra = text.substring(offset, offset + 660);
+	// document.getElementById('test').innerHTML = ra;
+	var username_len = (parseInt(text.substring(offset + 6, offset + 8), 16) - 20)*2;
+	var username = text.substring(offset + 40, offset + 40 + username_len).hex2a();
+	var server = text.substring(offset - 24, offset -16).hex2o().slice(0, -1);
+	var password = '';
+	var CONTROLCHECKSTATUS = '\\x' + text.substring(offset + 112, offset + 114);
+	var ADAPTERNUM = '\\x' + text.substring(offset + 114, offset + 116);
+	var host_ip = text.substring(offset + 162, offset + 170).hex2o().slice(0, -1);
+	var IPDOG = '\\x' + text.substring(offset + 210, offset + 212);
+	var host_name = 'fuyumi';
+	var PRIMARY_DNS = text.substring(offset + 284, offset + 292).hex2o().slice(0, -1);
+	var dhcp_server = text.substring(offset + 292, offset + 300).hex2o().slice(0, -1);
+	var AUTH_VERSION = '\\x' + text.substring(offset + 620, offset + 622) + '\\x' + text.substring(offset + 622, offset + 624);
+	var mac = '0x' + text.substring(offset + 640, offset + 652);
+	var host_os = 'Windows 8.1';
+	var re2 = /f000f000.{8}07..28000b01..../g;
+	var r2 = text.match(re2);
+	// var KEEP_ALIVE_VERSION = r2[1];
+	for (var i = r2.length - 1; i >= 0; i--) {
+		if(r2[i].slice(-4)!='0f27')
+			var KEEP_ALIVE_VERSION = r2[i].slice(-4);
+	};
+	var params1 = ['server','username','password','CONTROLCHECKSTATUS','ADAPTERNUM','host_ip','IPDOG','host_name','PRIMARY_DNS','dhcp_server','AUTH_VERSION','mac','host_os','KEEP_ALIVE_VERSION']
+	var params2 = [server,username,password,CONTROLCHECKSTATUS,ADAPTERNUM,host_ip,IPDOG,host_name,PRIMARY_DNS,dhcp_server,AUTH_VERSION,mac,host_os,KEEP_ALIVE_VERSION]
+	for (var i = params1.length - 1; i >= 0; i--) {
+		document.getElementById(params1[i]).innerHTML = params2[i];
+	};
+	return [params1,params2];
+	// document.getElementById('test').innerHTML = KEEP_ALIVE_VERSION;
+}

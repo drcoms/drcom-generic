@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Auto Configure</title>
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<script src="js/jquery.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/FileSaver.min.js"></script>
+	<script src="js/re.js"></script>
+</head>
+<body>
+	<div class="navbar navbar-fixed=top header">
+		<div class="container">
+			<a class="navbar-brand">Auto Configure</a>
+		</div>
+	</div>
+	<div class="container" style="margin-top:100px;">
+		<div class="col-md-12">
+			<div class="button-upload">
+				<a id="file-upload" class="btn btn-lg btn-primary">upload</a>
+				<a id="config-generate" class="btn btn-lg btn-primary">generate</a>
+			</div>
+			<div class="panel1 table-responsive">
+				<table class="table table-hover table-bordered table-condensed table-striped">
+					<tr>
+						<th>server</th>
+						<td id="server"></td>
+					</tr>
+					<tr>
+						<th>username</th>
+						<td id="username"></td>
+					</tr>
+					<tr>
+						<th>password</th>
+						<td id="password"></td>
+					</tr>
+					<tr>
+						<th>CONTROLCHECKSTATUS</th>
+						<td id="CONTROLCHECKSTATUS"></td>
+					</tr>
+					<tr>
+						<th>ADAPTERNUM</th>
+						<td id="ADAPTERNUM"></td>
+					</tr>
+					<tr>
+						<th>host_ip</th>
+						<td id="host_ip"></td>
+					</tr>
+					<tr>
+						<th>IPDOG</th>
+						<td id="IPDOG"></td>
+					</tr>
+					<tr>
+						<th>host_name</th>
+						<td id="host_name"></td>
+					</tr>
+					<tr>
+						<th>PRIMARY_DNS</th>
+						<td id="PRIMARY_DNS"></td>
+					</tr>
+					<tr>
+						<th>dhcp_server</th>
+						<td id="dhcp_server"></td>
+					</tr>
+					<tr>
+						<th>AUTH_VERSION</th>
+						<td id="AUTH_VERSION"></td>
+					</tr>
+					<tr>
+						<th>mac</th>
+						<td id="mac"></td>
+					</tr>
+					<tr>
+						<th>host_os</th>
+						<td id="host_os"></td>
+					</tr>
+					<tr>
+						<th>KEEP_ALIVE_VERSION</th>
+						<td id="KEEP_ALIVE_VERSION"></td>
+					</tr>
+				</table>
+			</div>
+			<div class="footer">
+				<p id=footer>fuyumi reserved.</p>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
