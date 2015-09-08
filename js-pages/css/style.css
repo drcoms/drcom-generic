@@ -9,16 +9,16 @@
 	background-color: #9bbbff;
 }
 
-.panel1 {
+#panel1 {
 	position: relative;
-	height: 460px;
+	height: 470px;
 	width: 100%;
 	top: -130px;
 }
 
-.panel2 {
+#panel2 {
 	position: relative;
-	height: 460px;
+	height: 470px;
 	width: 100%;
 	top: -130px;
 }
@@ -26,13 +26,14 @@
 .footer {
 	position: absolute;
 	left: 0px;
-	bottom: 15px;
+	bottom: 25px;
 	width: 100%;
 	min-width: 50%;
-	height: 50px;
+	height: 60px;
 	color: white;
 	background-color: black;
 	padding: 12px 0 0 25px;
+	border-radius: 5px 20px 5px;
 }
 
 th {
@@ -44,7 +45,16 @@ th {
 }
 
 .navbar-brand:hover {
-	color: #8ac007;
+	color: #cd6a51;
+}
+
+#password {
+	float: left;
+	width: 93%;
+}
+
+#edit {
+	float: right;
 }
 
 body {
