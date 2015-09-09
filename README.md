@@ -8,6 +8,7 @@
 
 建议有问题先读wiki，再发issue
 
+* 在线配置器 http://drcoms.github.io/drcom-generic/ by NTR君
 * 相关工具和验证用的代码在 *utils* 目录下
 * 测试数据在 *tests* 目录下
 * 所有说明已移动到 [wiki](https://github.com/drcoms/generic/wiki) 中
