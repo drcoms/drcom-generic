@@ -1,0 +1,76 @@
+.button-upload {
+	position: relative;
+	float: right;
+	right: 100px;
+	top: -150px;
+}
+
+.header {
+	background-color: #9bbbff;
+}
+
+#panel1 {
+	position: relative;
+	height: 470px;
+	width: 100%;
+	top: -130px;
+}
+
+#panel2 {
+	position: relative;
+	height: 470px;
+	width: 100%;
+	top: -130px;
+}
+
+.footer {
+	position: absolute;
+	left: 0px;
+	bottom: 25px;
+	width: 100%;
+	min-width: 50%;
+	height: 60px;
+	color: white;
+	background-color: black;
+	padding: 12px 0 0 25px;
+	border-radius: 5px 20px 5px;
+}
+
+th {
+	width: 20%;
+}
+
+.navbar-brand {
+	color: #fff;
+}
+
+.navbar-brand:hover {
+	color: #cd6a51;
+}
+
+#password {
+	float: left;
+	width: 93%;
+}
+
+#edit {
+	float: right;
+}
+
+body {
+	overflow-y:hidden;
+	font-family: 'Open Sans', "Open Sans Light", "Helvetica Neue", Helvetica,Arial, "Hiragino Sans GB", "Hiragino Sans GB W3", "Microsoft YaHei UI", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+}
+
+@font-face {
+	font-family: 'Open Sans';
+	font-style: normal;
+	font-weight: 400;
+	src: local('Open Sans'), local('Open-Sans'), url('./font/Open Sans.woff2') format('woff2');
+}
+@font-face {
+	font-family: 'Open Sans Light';
+	font-style: normal;
+	font-weight: 300;
+	src: local('Open Sans Light'), local(Open-Sans-Light), url('./font/Open Sans Light.woff2') format('woff2');
+}
