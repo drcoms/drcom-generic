@@ -26,7 +26,7 @@ $(document).ready(function (){
 		var gen = '';
 		for (var i = 0; i < params[0].length; i++) {
 			if (params[0][i] == 'mac'){
-				gen += (params[0][i] + ' =  + params[1][i] + '\n');
+				gen += (params[0][i] + ' = ' + params[1][i] + '\n');
 			}
 			gen += (params[0][i] + ' = \'' + params[1][i] + '\'\n');
 		};
