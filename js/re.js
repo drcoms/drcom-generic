@@ -27,8 +27,9 @@ $(document).ready(function (){
 		for (var i = 0; i < params[0].length; i++) {
 			if (params[0][i] == 'mac'){
 				gen += (params[0][i] + ' = ' + params[1][i] + '\n');
+			} else {
+				gen += (params[0][i] + ' = \'' + params[1][i] + '\'\n');
 			}
-			gen += (params[0][i] + ' = \'' + params[1][i] + '\'\n');
 		};
 		gen = gen.slice(0, -1);
 		var blob = new Blob([gen], {type: "text/plain;charset=utf-8"});
