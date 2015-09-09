@@ -94,15 +94,15 @@ function re_d (text) {
 	// document.getElementById('test').innerHTML = ra;
 	var username_len = (parseInt(text.substring(offset + 6, offset + 8), 16) - 20)*2;
 	var username = text.substring(offset + 40, offset + 40 + username_len).hex2a();
-	var server = text.substring(offset - 24, offset -16).hex2o().slice(0, -1);
+	var server = text.substring(offset - 24, offset -16);
 	var password = '';
 	var CONTROLCHECKSTATUS = '\\x' + text.substring(offset + 112, offset + 114);
 	var ADAPTERNUM = '\\x' + text.substring(offset + 114, offset + 116);
-	var host_ip = text.substring(offset + 162, offset + 170).hex2o().slice(0, -1);
+	var host_ip = text.substring(offset + 162, offset + 170).replace(/../ig, function (s,t) {return '\\x' + s});
 	var IPDOG = '\\x' + text.substring(offset + 210, offset + 212);
 	var host_name = 'fuyumi';
-	var PRIMARY_DNS = text.substring(offset + 284, offset + 292).hex2o().slice(0, -1);
-	var dhcp_server = text.substring(offset + 292, offset + 300).hex2o().slice(0, -1);
+	var PRIMARY_DNS = text.substring(offset + 284, offset + 292).replace(/../ig, function (s,t) {return '\\x' + s});
+	var dhcp_server = text.substring(offset + 292, offset + 300).replace(/../ig, function (s,t) {return '\\x' + s});
 	var AUTH_VERSION = '\\x' + text.substring(offset + 620, offset + 622) + '\\x' + text.substring(offset + 622, offset + 624);
 	var mac = '0x' + text.substring(offset + 640, offset + 652);
 	var host_os = 'Windows 8.1';
@@ -111,7 +111,7 @@ function re_d (text) {
 	// var KEEP_ALIVE_VERSION = r2[1];
 	for (var i = r2.length - 1; i >= 0; i--) {
 		if(r2[i].slice(-4)!='0f27')
-			var KEEP_ALIVE_VERSION = r2[i].slice(-4).replace(/../ig, function (s,t) {return '\\x' + s});;
+			var KEEP_ALIVE_VERSION = r2[i].slice(-4).replace(/../ig, function (s,t) {return '\\x' + s});
 	};
 	var params1 = ['server','username','password','CONTROLCHECKSTATUS','ADAPTERNUM','host_ip','IPDOG','host_name','PRIMARY_DNS','dhcp_server','AUTH_VERSION','mac','host_os','KEEP_ALIVE_VERSION']
 	var params2 = [server,username,password,CONTROLCHECKSTATUS,ADAPTERNUM,host_ip,IPDOG,host_name,PRIMARY_DNS,dhcp_server,AUTH_VERSION,mac,host_os,KEEP_ALIVE_VERSION]
