@@ -9,9 +9,6 @@ $(document).ready(function (){
 			var reader = new FileReader();
 			reader.onload = function(e) {
 				var data = e.target.result;
-				// alert(data);
-				// document.getElementById('test').innerHTML = data;
-				// params = re_d(data);
 				if ($('.table-responsive').is('#panel1')) {
 					params = re_d(data);
 				} else{
@@ -38,12 +35,6 @@ $(document).ready(function (){
 	$('#edit').click(function(){
 		params[1][2] = $('#password').val();
 	});
-	// $('#v_d').click(function(){
-	// 	$('#panel1').load('index.html' + ' #panel1');
-	// });
-	// $('#v_p').click(function(){
-	// 	$('#panel2').load('config_p.html' + ' #panel2');
-	// });
 });
 
 function fileupload (callback, accept) {
@@ -89,26 +80,22 @@ function re_d (text) {
 	var re1 = /f000f000[00-ff]{8}0301/;
 	var r1 = text.match(re1);
 	var offset = text.indexOf(r1) + 16;
-	// document.getElementById('test').innerHTML = offset;
-	// ra = text.substring(offset, offset + 660);
-	// document.getElementById('test').innerHTML = ra;
 	var username_len = (parseInt(text.substring(offset + 6, offset + 8), 16) - 20)*2;
 	var username = text.substring(offset + 40, offset + 40 + username_len).hex2a();
-	var server = text.substring(offset - 24, offset -16);
+	var server = text.substring(offset - 24, offset -16).hex2o().slice(0, -1);
 	var password = '';
 	var CONTROLCHECKSTATUS = '\\x' + text.substring(offset + 112, offset + 114);
 	var ADAPTERNUM = '\\x' + text.substring(offset + 114, offset + 116);
-	var host_ip = text.substring(offset + 162, offset + 170).replace(/../ig, function (s,t) {return '\\x' + s});
+	var host_ip = text.substring(offset + 162, offset + 170).hex2o().slice(0, -1);
 	var IPDOG = '\\x' + text.substring(offset + 210, offset + 212);
 	var host_name = 'fuyumi';
-	var PRIMARY_DNS = text.substring(offset + 284, offset + 292).replace(/../ig, function (s,t) {return '\\x' + s});
-	var dhcp_server = text.substring(offset + 292, offset + 300).replace(/../ig, function (s,t) {return '\\x' + s});
+	var PRIMARY_DNS = text.substring(offset + 284, offset + 292).hex2o().slice(0, -1);
+	var dhcp_server = text.substring(offset + 292, offset + 300).hex2o().slice(0, -1);
 	var AUTH_VERSION = '\\x' + text.substring(offset + 620, offset + 622) + '\\x' + text.substring(offset + 622, offset + 624);
 	var mac = '0x' + text.substring(offset + 640, offset + 652);
 	var host_os = 'Windows 8.1';
 	var re2 = /f000f000.{8}07..28000b01..../g;
 	var r2 = text.match(re2);
-	// var KEEP_ALIVE_VERSION = r2[1];
 	for (var i = r2.length - 1; i >= 0; i--) {
 		if(r2[i].slice(-4)!='0f27')
 			var KEEP_ALIVE_VERSION = r2[i].slice(-4).replace(/../ig, function (s,t) {return '\\x' + s});
@@ -119,7 +106,6 @@ function re_d (text) {
 		document.getElementById(params1[i]).innerHTML = params2[i];
 	};
 	return [params1,params2];
-	// document.getElementById('test').innerHTML = KEEP_ALIVE_VERSION;
 }
 
 function re_p (text) {
