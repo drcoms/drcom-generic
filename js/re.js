@@ -115,7 +115,7 @@ function re_p (text) {
 	var offset = text.indexOf(r1);
 	var server = text.substring(offset - 24, offset -16).hex2o().slice(0, -1);
 	var pppoe_flag = '\\x' + text.substring(offset + 38, offset + 40);
-	var re2 = /07.{4}28000b..(..)02/;
+	var re2 = /07.{2}28000b..(..)02/;
 	var keep_alive2_flag = '\\x' + text.match(re2)[1];
 	var params1 = ['server','pppoe_flag','keep_alive2_flag'];
 	var params2 = [server,pppoe_flag,keep_alive2_flag]
