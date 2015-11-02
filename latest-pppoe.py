@@ -1,4 +1,5 @@
-#coding=utf-8
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
 I want to express my great thanks to the following friends
 they brought me hope of this version (in QQ Group 318495368)
@@ -9,18 +10,25 @@ they brought me hope of this version (in QQ Group 318495368)
 import socket
 import struct
 import time
-from hashlib import md5
 import sys
 import random
 import platform
 import os
 
+# CONFIG
 server = '61.142.108.96'
 pppoe_flag = '\x00'
 keep_alive2_flag = '\xdc'
+# CONFIG_END
+
 host_ip = server
+IS_TEST = True
+CONF = "/etc/drcom.conf"
 DEBUG = False #log saves to file
-LOG_PATH = 'drcom_client.log'
+if IS_TEST:
+    CONF = ''
+    DEBUG = True
+    LOG_PATH = 'drcom_client.log'
 
 def log(*args, **kwargs):
     s = ' '.join(args)
@@ -28,12 +36,12 @@ def log(*args, **kwargs):
         s += '\n\tpacket:' + kwargs['pkt'].encode('hex')
     print '[*] ', s
     if DEBUG:
-      with open(LOG_PATH,'ab') as f:
-          try:
-              f.write(s)
-              f.write('\n')
-          except:
-              f.write('FUCK WINDOWS' + '\n')
+        with open(LOG_PATH,'ab') as f:
+            try:
+                f.write(s)
+                f.write('\n')
+            except:
+                f.write('FUCK WINDOWS' + '\n')
 
 def dump(n):
     s = '%x' % n
@@ -42,15 +50,18 @@ def dump(n):
     return s.decode('hex')
 
 def gbk2utf8(string):
-    if platform.uname()[0] != 'Windows':
-        return string.decode('gb2312').encode().decode()
-    else:
-        return string.decode('gb2312')
+    try:
+        if platform.uname()[0] != 'Windows':
+            return string.decode('gb2312').encode().decode()
+        else:
+            return string.decode('gb2312')
+    except Exception, e:
+        return 'error for decoding'
 
 class Socket:
-
     def __init__(self, server, port=61440):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind(("0.0.0.0", 61440))
         log("open local port:" + str(port))
         log("DEBUG MODE:"+ str(DEBUG))
@@ -65,7 +76,7 @@ class Socket:
         while True:
             data, address = self.s.recvfrom(1024)
             if data[0] == '\x4d':
-                log('received message packet, dropped. message:' + gbk2utf8(data[4:]))
+                log('received message packet, dropped. message: ' + gbk2utf8(data[4:]))
                 continue
             return data, address
 
@@ -78,10 +89,7 @@ class Socket:
     def recvfrom(self, *args):
         return self.recv()
 
-
-
 class PPPOEHeartbeat:
-
     def __init__(self, num=1):
         self.count = num # 计数器
     def _make_challenge(self):
@@ -163,23 +171,23 @@ class PPPOEHeartbeat:
 def keep_alive_package_builder(number,random,tail,type=1,first=False):
     data = '\x07'+ chr(number) + '\x28\x00\x0b' + chr(type)
     if first :
-      data += '\x0f\x27'
+        data += '\x0f\x27'
     else:
-      data += keep_alive2_flag + '\x02'
+        data += keep_alive2_flag + '\x02'
     data += '\x2f\x12' + '\x00' * 6
     data += tail
     data += '\x00' * 4
     #data += struct.pack("!H",0xdc02)
     if type == 3:
-      foo = ''.join([chr(int(i)) for i in host_ip.split('.')]) # host_ip
-      #CRC
-      # edited on 2014/5/12, filled zeros to checksum
-      # crc = packet_CRC(data+foo)
-      crc = '\x00' * 4
-      #data += struct.pack("!I",crc) + foo + '\x00' * 8
-      data += crc + foo + '\x00' * 8
+        foo = ''.join([chr(int(i)) for i in host_ip.split('.')]) # host_ip
+        #CRC
+        # edited on 2014/5/12, filled zeros to checksum
+        # crc = packet_CRC(data+foo)
+        crc = '\x00' * 4
+        #data += struct.pack("!I",crc) + foo + '\x00' * 8
+        data += crc + foo + '\x00' * 8
     else: #packet type = 1
-      data += '\x00' * 16
+        data += '\x00' * 16
     return data
 
 def keep_alive2(s, pppoe):
@@ -238,31 +246,38 @@ def keep_alive2(s, pppoe):
     
     i = svr_num
     while True:
-      try:
-        ran += random.randint(1,10)   
-        packet = keep_alive_package_builder(i,dump(ran),tail,1,False)
-        log('[keep_alive2] send',str(i), pkt=packet)
-        s.sendto(packet, (svr, 61440))
-        data, address = s.recvfrom(1024)
-        log('[keep_alive2] recv', pkt=data)
-        tail = data[16:20]
+        try:
+            ran += random.randint(1,10)   
+            packet = keep_alive_package_builder(i,dump(ran),tail,1,False)
+            log('[keep_alive2] send',str(i), pkt=packet)
+            s.sendto(packet, (svr, 61440))
+            data, address = s.recvfrom(1024)
+            log('[keep_alive2] recv', pkt=data)
+            tail = data[16:20]
         
-        ran += random.randint(1,10)   
-        packet = keep_alive_package_builder(i+1,dump(ran),tail,3,False)
-        s.sendto(packet, (svr, 61440))
-        log('[keep_alive2] send',str(i+1), pkt=packet)
-        data, address = s.recvfrom(1024)
-        log('[keep_alive2] recv', pkt=data)
-        tail = data[16:20]
-        i = (i+2) % 0xFF
-        time.sleep(10)
-        #send pppoe heartbeat once
-        pppoe.send(s)
-      except:
-        pass
+            ran += random.randint(1,10)   
+            packet = keep_alive_package_builder(i+1,dump(ran),tail,3,False)
+            s.sendto(packet, (svr, 61440))
+            log('[keep_alive2] send',str(i+1), pkt=packet)
+            data, address = s.recvfrom(1024)
+            log('[keep_alive2] recv', pkt=data)
+            tail = data[16:20]
+            i = (i+2) % 0xFF
+            time.sleep(10)
+            #send pppoe heartbeat once
+            pppoe.send(s)
+        except:
+            pass
 
+def daemon():
+    with open('/var/run/drcom_p.pid','w') as f:
+        f.write(str(os.getpid()))
 
 def main():
+    if not IS_TEST:
+        daemon()
+        execfile(CONF, globals())
+    log('auth svr:' + server + '\npppoe_flag:' + pppoe_flag.encode('hex') + '\nkeep_alive2_flag:' + keep_alive2_flag.encode('hex'))
     while True:
         s = Socket(server)
         pppoe = PPPOEHeartbeat(1)

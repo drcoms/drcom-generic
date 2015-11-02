@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import socket, struct, time
 from hashlib import md5
 import sys
@@ -22,19 +23,20 @@ IPDOG = '\x01'
 # CONFIG_END
 
 class ChallengeException (Exception):
-  def __init__(self):
-    pass
+    def __init__(self):
+        pass
 
 class LoginException (Exception):
-  def __init__(self):
-    pass
+    def __init__(self):
+        pass
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.bind(("0.0.0.0", 61440))
 
 s.settimeout(3)
 SALT = ''
-IS_TEST = False
+IS_TEST = True
 # specified fields based on version
 CONF = "/etc/drcom.conf"
 if IS_TEST:
