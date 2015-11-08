@@ -54,27 +54,27 @@ def log(*args, **kwargs):
     s = ' '.join(args)
     print s
     if DEBUG:
-      with open(LOG_PATH,'a') as f:
-          f.write(s + '\n')
+        with open(LOG_PATH,'a') as f:
+            f.write(s + '\n')
 
 def challenge(svr,ran):
     while True:
-      t = struct.pack("<H", int(ran)%(0xFFFF))
-      s.sendto("\x01\x02"+t+"\x09"+"\x00"*15, (svr, 61440))
-      try:
-        data, address = s.recvfrom(1024)
-        log('[challenge] recv',data.encode('hex'))
-      except:
-        log('[challenge] timeout, retrying...')
-        continue
+        t = struct.pack("<H", int(ran)%(0xFFFF))
+        s.sendto("\x01\x02"+t+"\x09"+"\x00"*15, (svr, 61440))
+        try:
+            data, address = s.recvfrom(1024)
+            log('[challenge] recv',data.encode('hex'))
+        except:
+            log('[challenge] timeout, retrying...')
+            continue
         
-      if address == (svr, 61440):
-        break
-      else:
-        continue
+        if address == (svr, 61440):
+            break
+        else:
+            continue
     log('[DEBUG] challenge:\n' + data.encode('hex'))
     if data[0] != '\x02':
-      raise ChallengeException
+        raise ChallengeException
     log('[challenge] challenge packet sent.')
     return data[4:8]
 
@@ -89,42 +89,42 @@ def dump(n):
         s = '0' + s
     return s.decode('hex')
 
-def ror(md5, pwd):
-    ret = ''
-    for i in range(len(pwd)):
-        x = ord(md5[i]) ^ ord(pwd[i])
-        ret += chr(((x<<3)&0xFF) + (x>>5))
-    return ret
+# def ror(md5, pwd):
+#     ret = ''
+#     for i in range(len(pwd)):
+#         x = ord(md5[i]) ^ ord(pwd[i])
+#         ret += chr(((x<<3)&0xFF) + (x>>5))
+#     return ret
 
 def keep_alive_package_builder(number,random,tail,type=1,first=False):
     data = '\x07'+ chr(number) + '\x28\x00\x0b' + chr(type)
     if first :
-      data += '\x0f\x27'
+        data += '\x0f\x27'
     else:
-      data += KEEP_ALIVE_VERSION
+        data += KEEP_ALIVE_VERSION
     data += '\x2f\x12' + '\x00' * 6
     data += tail
     data += '\x00' * 4
     #data += struct.pack("!H",0xdc02)
     if type == 3:
-      foo = ''.join([chr(int(i)) for i in host_ip.split('.')]) # host_ip
-      #CRC
-      # edited on 2014/5/12, filled zeros to checksum
-      # crc = packet_CRC(data+foo)
-      crc = '\x00' * 4
-      #data += struct.pack("!I",crc) + foo + '\x00' * 8
-      data += crc + foo + '\x00' * 8
+        foo = ''.join([chr(int(i)) for i in host_ip.split('.')]) # host_ip
+        #CRC
+        # edited on 2014/5/12, filled zeros to checksum
+        # crc = packet_CRC(data+foo)
+        crc = '\x00' * 4
+        #data += struct.pack("!I",crc) + foo + '\x00' * 8
+        data += crc + foo + '\x00' * 8
     else: #packet type = 1
-      data += '\x00' * 16
+        data += '\x00' * 16
     return data
 
-def packet_CRC(s):
-    ret = 0
-    for i in re.findall('..', s):
-        ret ^= struct.unpack('>h', i)[0]
-        ret &= 0xFFFF
-    ret = ret * 0x2c7
-    return ret
+# def packet_CRC(s):
+#     ret = 0
+#     for i in re.findall('..', s):
+#         ret ^= struct.unpack('>h', i)[0]
+#         ret &= 0xFFFF
+#     ret = ret * 0x2c7
+#     return ret
 
 def keep_alive2(*args):
     #first keep_alive:
@@ -189,31 +189,31 @@ def keep_alive2(*args):
     
     i = svr_num
     while True:
-      try:
-        ran += random.randint(1,10)   
-        packet = keep_alive_package_builder(i,dump(ran),tail,1,False)
-        #log('DEBUG: keep_alive2,packet 4\n',packet.encode('hex'))
-        log('[keep_alive2] send',str(i),packet.encode('hex'))
-        s.sendto(packet, (svr, 61440))
-        data, address = s.recvfrom(1024)
-        log('[keep_alive2] recv',data.encode('hex'))
-        tail = data[16:20]
-        #log('DEBUG: keep_alive2,packet 4 return\n',data.encode('hex'))
+        try:
+            ran += random.randint(1,10)   
+            packet = keep_alive_package_builder(i,dump(ran),tail,1,False)
+            #log('DEBUG: keep_alive2,packet 4\n',packet.encode('hex'))
+            log('[keep_alive2] send',str(i),packet.encode('hex'))
+            s.sendto(packet, (svr, 61440))
+            data, address = s.recvfrom(1024)
+            log('[keep_alive2] recv',data.encode('hex'))
+            tail = data[16:20]
+            #log('DEBUG: keep_alive2,packet 4 return\n',data.encode('hex'))
         
-        ran += random.randint(1,10)   
-        packet = keep_alive_package_builder(i+1,dump(ran),tail,3,False)
-        #log('DEBUG: keep_alive2,packet 5\n',packet.encode('hex'))
-        s.sendto(packet, (svr, 61440))
-        log('[keep_alive2] send',str(i+1),packet.encode('hex'))
-        data, address = s.recvfrom(1024)
-        log('[keep_alive2] recv',data.encode('hex'))
-        tail = data[16:20]
-        #log('DEBUG: keep_alive2,packet 5 return\n',data.encode('hex'))
-        i = (i+2) % 0xFF
-        time.sleep(20)
-        keep_alive1(*args)
-      except:
-        pass
+            ran += random.randint(1,10)   
+            packet = keep_alive_package_builder(i+1,dump(ran),tail,3,False)
+            #log('DEBUG: keep_alive2,packet 5\n',packet.encode('hex'))
+            s.sendto(packet, (svr, 61440))
+            log('[keep_alive2] send',str(i+1),packet.encode('hex'))
+            data, address = s.recvfrom(1024)
+            log('[keep_alive2] recv',data.encode('hex'))
+            tail = data[16:20]
+            #log('DEBUG: keep_alive2,packet 5 return\n',data.encode('hex'))
+            i = (i+2) % 0xFF
+            time.sleep(20)
+            keep_alive1(*args)
+        except:
+            pass
 
     
 import re
@@ -284,16 +284,20 @@ def login(usr, pwd, svr):
         log('[login] packet sent.')
         if address == (svr, 61440):
             if data[0] == '\x04':
-              log('[login] loged in')
-              break
+                log('[login] loged in')
+                break
             else:
-              continue
+                log('[login] login failed.')
+                if IS_TEST:
+                    sys.exit(0)
+                time.sleep(30)
+                continue
         else:
             if i >= 5 and UNLIMITED_RETRY == False :
-              log('[login] exception occured.')
-              sys.exit(1)
+                log('[login] exception occured.')
+                sys.exit(1)
             else:
-              continue
+                continue
             
     log('[login] login sent')
     #0.8 changed:
