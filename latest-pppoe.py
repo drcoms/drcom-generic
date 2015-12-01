@@ -102,7 +102,7 @@ class PPPOEHeartbeat:
     def _DrcomCRC32(self, data, init = 0):
       ret = init
       for i in range(len(data))[::4]:
-          ret ^= struct.unpack('I', data[i:i+4])[0]
+          ret ^= struct.unpack('<I', data[i:i+4])[0]
           ret &= 0xFFFFFFFF
       return ret
 
