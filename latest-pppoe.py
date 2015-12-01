@@ -120,10 +120,10 @@ class PPPOEHeartbeat:
         else:
             data += '\x00\x63\x00' + pppoe_flag
         data += challenge_seed # Challenge Seed
-        data += struct.pack('I',20000711) # DRCOM_DIAL_EXT_PROTO_CRC_INIT
-        data += struct.pack('I',126)
+        data += struct.pack('<I',20000711) # DRCOM_DIAL_EXT_PROTO_CRC_INIT
+        data += struct.pack('<I',126)
         crc = (self._DrcomCRC32(data) * 19680126) & 0xFFFFFFFF
-        data = data[:-8] + struct.pack("I", crc) + '\x00\x00\x00\x00'
+        data = data[:-8] + struct.pack('<I', crc) + '\x00\x00\x00\x00'
         # data += '\x7e\x00\x00\x00'
         #   data += '\x00\x00\x00\x7e'
         # - DrcomDialExtProtoHeader end -
