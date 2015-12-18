@@ -1,5 +1,7 @@
 注意
 -----------
+
+[![Join the chat at https://gitter.im/drcoms/drcom-generic](https://badges.gitter.im/drcoms/drcom-generic.svg)](https://gitter.im/drcoms/drcom-generic?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 本项目会随着 *DrCOM* 客户端更新而跟进，建议您使用 *Watch* 而不是 *fork* 功能，因为 *fork* 具有时效性，您 *fork* 的代码可能不是最新的。项目不会关闭，所以请放心使用。跪求折腾 *DrCOM* 的同学，请发邮件到 *latyas at gmail.com*, 让我把您加入开发者。
 
 说明
