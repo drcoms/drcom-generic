@@ -1,76 +1,85 @@
+.icon-block {
+    padding: 0 15px;
+}
+
+.icon-block .material-icons {
+    font-size: inherit;
+}
+
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;  /* Preferred icon size */
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+
+    /* Support for all WebKit browsers. */
+    -webkit-font-smoothing: antialiased;
+    /* Support for Safari and Chrome. */
+    text-rendering: optimizeLegibility;
+
+    /* Support for Firefox. */
+    -moz-osx-font-smoothing: grayscale;
+
+    /* Support for IE. */
+    font-feature-settings: 'liga';
+}
+
 .button-upload {
-	position: relative;
-	float: right;
-	right: 100px;
-	top: -150px;
-}
-
-.header {
-	background-color: #9bbbff;
-}
-
-#panel1 {
-	position: relative;
-	height: 470px;
-	width: 100%;
-	top: -130px;
-}
-
-#panel2 {
-	position: relative;
-	height: 470px;
-	width: 100%;
-	top: -130px;
-}
-
-.footer {
-	position: absolute;
-	left: 0px;
-	bottom: 25px;
-	width: 100%;
-	min-width: 50%;
-	height: 60px;
-	color: white;
-	background-color: black;
-	padding: 12px 0 0 25px;
-	border-radius: 5px 20px 5px;
+    position: relative;
+    float: right;
+    right: 100px;
+    top: -150px;
 }
 
 th {
-	width: 20%;
+    width: 20%;
 }
 
 .navbar-brand {
-	color: #fff;
+    color: #fff;
 }
 
 .navbar-brand:hover {
-	color: #cd6a51;
+    color: #cd6a51;
 }
 
 #password {
-	float: left;
-	width: 93%;
+    float: left;
+    width: 60%;
 }
 
 #edit {
-	float: right;
+    float: right;
 }
 
 body {
-	overflow-y:hidden;
-	font-family: 'Open Sans', "Open Sans Light", "Helvetica Neue", Helvetica,Arial, "Hiragino Sans GB", "Hiragino Sans GB W3", "Microsoft YaHei UI", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+    font-family: 'Roboto-Regular', 'Open Sans', "Open Sans Light", "Helvetica Neue", Helvetica,Arial, "Hiragino Sans GB", "Hiragino Sans GB W3", "Microsoft YaHei UI", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
 }
 
 @font-face {
-	font-family: 'Open Sans';
-	font-style: normal;
-	font-weight: 400;
-	src: local('Open Sans'), local('Open-Sans'), url('./font/Open Sans.woff2') format('woff2');
+    font-family: 'Roboto-Regular';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Roboto'), local('Roboto-Regular'), url('../font/Roboto-Regular.woff2') format('woff2');
 }
+
 @font-face {
-	font-family: 'Open Sans Light';
-	font-style: normal;
-	font-weight: 300;
-	src: local('Open Sans Light'), local(Open-Sans-Light), url('./font/Open Sans Light.woff2') format('woff2');
+    font-family: 'Material Icons';
+    font-style: normal;
+    font-weight: 400;
+    src: url('//cdn.bootcss.com/material-design-icons/2.1.1/iconfont/MaterialIcons-Regular.eot'); /* For IE6-8 */
+    src: local('Material Icons'),
+       local('MaterialIcons-Regular'),
+       url('//cdn.bootcss.com/material-design-icons/2.1.1/iconfont/MaterialIcons-Regular.woff2') format('woff2'),
+       url('//cdn.bootcss.com/material-design-icons/2.1.1/iconfont/MaterialIcons-Regular.woff') format('woff'),
+       url('//cdn.bootcss.com/material-design-icons/2.1.1/iconfont/MaterialIcons-Regular.ttf') format('truetype');
 }
