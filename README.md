@@ -1,11 +1,12 @@
-注意
------------
-
+#drcom-generic
+===========
 [![Join the chat at https://gitter.im/drcoms/drcom-generic](https://badges.gitter.im/drcoms/drcom-generic.svg)](https://gitter.im/drcoms/drcom-generic?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+##注意
 
 本项目会随着 *DrCOM* 客户端更新而跟进，建议您使用 *Watch* 而不是 *fork* 功能，因为 *fork* 具有时效性，您 *fork* 的代码可能不是最新的。项目不会关闭，所以请放心使用。跪求折腾 *DrCOM* 的同学，请发邮件到 *latyas at gmail.com*, 让我把您加入开发者。
 
-说明
+##说明
 ------------
 本页面仅供drcom客户端开发的童鞋有价值，需要有一些相关的知识。有关drcom所有项目仅供研究使用，由滥用造成的法律后果与作者无关。
 
@@ -15,8 +16,9 @@
 * 相关工具和验证用的代码在 *utils* 目录下
 * 测试数据在 *tests* 目录下
 * 所有说明已移动到 [wiki](https://github.com/drcoms/generic/wiki) 中
+* 某些学校的版本请在 [custom](https://github.com/drcoms/drcom-generic/tree/master/custom) 目录中寻找
 
-其他
+##其他
 -------------------
 #### 黑科技：drcom client on 8266
 <http://blog.lyj.me/hei-ke-ji-esp8266-drcom-client/>
