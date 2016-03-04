@@ -195,7 +195,7 @@ do --do...end是Lua语言的语句块关键字
 	    nic_ip:add(pf.nic3_ip,buf(89,4))
 	    nic_ip:add(pf.nic4_ip,buf(93,4))
 
-	    local md5c = subtree:add(pf.f_checksum1,buf(97,8),"=md5(front + 1400070b)[0:8]")    --checksum1-md5c TODO:verify
+	    local md5c = subtree:add(pf.f_checksum1,buf(97,8)) --md5(front + 1400070b)[0:8]    --checksum1-md5c TODO:verify
 	    subtree:add(pf.f11,buf(105,1))
 	    subtree:add(pf.f_zeros,buf(106,4))
 	    subtree:add(pf.f_hostname,buf(110,32))
