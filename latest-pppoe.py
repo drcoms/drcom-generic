@@ -12,7 +12,7 @@ import struct
 import time
 import sys
 import random
-import platform
+# import platform
 import os
 
 # CONFIG
@@ -50,13 +50,14 @@ def dump(n):
     return s.decode('hex')
 
 def gbk2utf8(string):
-    try:
-        if platform.uname()[0] != 'Windows':
-            return string.decode('gb2312').encode().decode()
-        else:
-            return string.decode('gb2312')
-    except Exception, e:
-        return 'error for decoding'
+    # try:
+    #     if platform.uname()[0] != 'Windows':
+    #         return string.decode('gb2312').encode().decode()
+    #     else:
+    #         return string.decode('gb2312')
+    # except Exception as e:
+    #     return 'error for decoding'
+    return 'You have witness too much.'
 
 class Socket:
     def __init__(self, server, port=61440):
