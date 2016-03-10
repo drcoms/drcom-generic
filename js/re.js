@@ -119,7 +119,7 @@ String.prototype.hex2o = function(){
 
 function re_d (text) {
     text = text.hexEncode();
-    var re1 = /f000f000[00-ff]{8}..01/;
+    var re1 = /f000f000[00-ff]{8}0[37]01/;
     var r1 = text.match(re1);
     var offset = text.indexOf(r1) + 16;
     var username_len = (parseInt(text.substring(offset + 6, offset + 8), 16) - 20)*2;
