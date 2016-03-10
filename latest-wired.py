@@ -23,6 +23,13 @@ AUTH_VERSION = '\x0a\x00'
 IPDOG = '\x01'
 # CONFIG_END
 
+nic_name = '' #Indicate your nic, e.g. 'eth0.2'.nic_name
+
+if nic_name != '':
+    bind_nic()
+else:
+    bind_ip = '0.0.0.0'
+
 class ChallengeException (Exception):
     def __init__(self):
         pass
@@ -31,9 +38,29 @@ class LoginException (Exception):
     def __init__(self):
         pass
 
+def bind_nic():
+    try:
+        import fcntl
+        def get_ip_address(ifname):
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            return socket.inet_ntoa(fcntl.ioctl(
+                s.fileno(),
+                0x8915,  # SIOCGIFADDR
+                struct.pack('256s', ifname[:15])
+            )[20:24])
+            bind_ip = get_ip_address(nic_name)
+    except ImportError as e:
+        print('Indicate network nic feature need to be run under Unix based system.')
+        bind_ip = '0.0.0.0'
+    except IOError as e:
+        print(nic_name + 'is unacceptable !')
+        bind_ip = '0.0.0.0'
+    finally:
+        bind_ip = '0.0.0.0'
+
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 # s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-s.bind(("0.0.0.0", 61440))
+s.bind((bind_ip, 61440))
 
 s.settimeout(3)
 SALT = ''
