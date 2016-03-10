@@ -17,7 +17,7 @@ def hexed(s):
 filename = '998'
 f = open(filename, 'rb')
 text = f.read()
-offset = re.search('\xf0\x00\xf0\x00[\x00-\xFF]{4}\x03\x01', text).start() + 8
+offset = re.search('\xf0\x00\xf0\x00[\x00-\xFF]{4}[\x03\x07]\x01', text).start() + 8
 #print hexlify(text[offset:offset+330])
 print 'pcapng file:', filename
 print 'copy following statements to drcom.conf or overwrite field between "# CONFIG" and "# CONFIG_END" in latest-wired.py'
