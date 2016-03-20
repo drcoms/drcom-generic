@@ -24,11 +24,7 @@ IPDOG = '\x01'
 # CONFIG_END
 
 nic_name = '' #Indicate your nic, e.g. 'eth0.2'.nic_name
-
-if nic_name != '':
-    bind_nic()
-else:
-    bind_ip = '0.0.0.0'
+bind_ip = ''
 
 class ChallengeException (Exception):
     def __init__(self):
@@ -39,6 +35,7 @@ class LoginException (Exception):
         pass
 
 def bind_nic():
+    global bind_ip
     try:
         import fcntl
         def get_ip_address(ifname):
@@ -50,13 +47,18 @@ def bind_nic():
             )[20:24])
             bind_ip = get_ip_address(nic_name)
     except ImportError as e:
-        print('Indicate network nic feature need to be run under Unix based system.')
+        print('Indicate nic feature need to be run under Unix based system.')
         bind_ip = '0.0.0.0'
     except IOError as e:
         print(nic_name + 'is unacceptable !')
         bind_ip = '0.0.0.0'
     finally:
         bind_ip = '0.0.0.0'
+
+if nic_name != '':
+    bind_nic()
+else:
+    bind_ip = '0.0.0.0'
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 # s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
