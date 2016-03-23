@@ -24,7 +24,7 @@ IPDOG = '\x01'
 # CONFIG_END
 
 nic_name = '' #Indicate your nic, e.g. 'eth0.2'.nic_name
-bind_ip = ''
+bind_ip = '0.0.0.0'
 
 class ChallengeException (Exception):
     def __init__(self):
@@ -35,7 +35,6 @@ class LoginException (Exception):
         pass
 
 def bind_nic():
-    global bind_ip
     try:
         import fcntl
         def get_ip_address(ifname):
@@ -45,20 +44,18 @@ def bind_nic():
                 0x8915,  # SIOCGIFADDR
                 struct.pack('256s', ifname[:15])
             )[20:24])
-            bind_ip = get_ip_address(nic_name)
+        return get_ip_address(nic_name)
     except ImportError as e:
         print('Indicate nic feature need to be run under Unix based system.')
-        bind_ip = '0.0.0.0'
+        return '0.0.0.0'
     except IOError as e:
         print(nic_name + 'is unacceptable !')
-        bind_ip = '0.0.0.0'
+        return '0.0.0.0'
     finally:
-        bind_ip = '0.0.0.0'
+        return '0.0.0.0'
 
 if nic_name != '':
-    bind_nic()
-else:
-    bind_ip = '0.0.0.0'
+    bind_ip = bind_nic()
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 # s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -69,8 +66,6 @@ SALT = ''
 IS_TEST = True
 # specified fields based on version
 CONF = "/etc/drcom.conf"
-if IS_TEST:
-    CONF = ''
 UNLIMITED_RETRY = True
 EXCEPTION = False
 DEBUG = False #log saves to file
@@ -373,6 +368,7 @@ def main():
         daemon()
         execfile(CONF, globals())
     log("auth svr:"+server+"\nusername:"+username+"\npassword:"+password+"\nmac:"+str(hex(mac)))
+    log(bind_ip)
     while True:
       try:
         package_tail = login(username, password, server)
