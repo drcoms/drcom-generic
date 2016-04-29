@@ -314,8 +314,9 @@ def login(usr, pwd, svr):
             else:
                 log('[login] login failed.')
                 if IS_TEST:
-                    sys.exit(0)
-                time.sleep(30)
+                    time.sleep(3)
+                else:
+                    time.sleep(30)
                 continue
         else:
             if i >= 5 and UNLIMITED_RETRY == False :
