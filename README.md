@@ -21,7 +21,7 @@
 ##其他
 -------------------
 #### 黑科技：drcom client on 8266
-<http://blog.lyj.me/hei-ke-ji-esp8266-drcom-client/>
+<http://obaka.moe/hei-ke-ji-esp8266rang-ni-bai-tuo-drcomke-hu-duan.html>
 
 #### drcom_2011.lua
 这是一个由 *googlecode* 上 *jdrcom* 项目中的 *wireshark* 插件 <br>
