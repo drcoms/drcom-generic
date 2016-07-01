@@ -74,7 +74,7 @@ int os_len = sizeof(os) - 1;
 #define ALIVE_TRY 5
 #define INTERFACE 1
 #define D_GENERIC 1                 //D_GENERIC=0时cust专用  =1时为通用版
-#define OFF_LINE_TEST 1
+#define OFF_LINE_TEST 0
 
 /* infomation */
 struct user_info_pkt {
