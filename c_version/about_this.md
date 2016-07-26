@@ -1,18 +1,19 @@
 #dr.com 5.20d for cust/genenal_d
 ##test v1.3.7
-### ×÷Õß qoddi hnczp#icloud.com
-ÕâÊÇÒ»¸öMODµÄ°æ±¾£¬Ò²¾ÍÊÇ²Î¿¼ÁËÒÔÏÂ Latyas latyas#gmail.com µÄÁ½²¿·Ö¹²Í¬Íê³ÉµÄÒ»¸ö°æ±¾
+### ä½œè€… qoddi hnczp@icloud.com
+è¿™æ˜¯ä¸€ä¸ªMODçš„ç‰ˆæœ¬ï¼Œä¹Ÿå°±æ˜¯å‚è€ƒäº†ä»¥ä¸‹ Latyas latyas@gmail.com çš„ä¸¤éƒ¨åˆ†å…±åŒå®Œæˆçš„ä¸€ä¸ªç‰ˆæœ¬
 
-ÅÉÉ­¿Í»§¶Ë https://github.com/drcoms/drcom-generic
-jlu-drcom-clienthttps://github.com/drcoms/jlu-drcom-client/
+æ´¾æ£®å®¢æˆ·ç«¯         https://github.com/drcoms/drcom-generic
+jlu-drcom-client   https://github.com/drcoms/jlu-drcom-client/
 
-¸ĞĞ»dixyes <dixyes@gmail.com>Ìá¹©µÄ°ïÖúÒÔ¼°dogecomÔ´Âë
-Õâ¸ö°æ±¾ÀíÂÛÉÏÊÊÓÃÓÚ¾ø´ó¶àÊıD°æ£¬ĞŞ¸Äd_generic£½1ÔÙ¸ÄÏÂ·½ÅäÖÃ,µ±d_general =0Ê±Îªcust×¨ÓÃ
+æ„Ÿè°¢dixyes <dixyes@gmail.com>æä¾›çš„å¸®åŠ©ä»¥åŠdogecomæºç 
 
-ĞŞÕıLOGIN°ü¶ÔÆëÎÊÌâ£¬ĞŞÕıKL2¼ÆÊıÎÊÌâ,ÀëÏß²âÊÔ²ÎÊıofflinetest£¬ÔÚÏßÊ¹ÓÃÇëÖÃ0
+è¿™ä¸ªç‰ˆæœ¬ç†è®ºä¸Šé€‚ç”¨äºç»å¤§å¤šæ•°Dç‰ˆï¼Œä¿®æ”¹d_genericï¼1å†æ”¹ä¸‹æ–¹é…ç½®,å½“d_general =0æ—¶ä¸ºcustä¸“ç”¨
 
-ÕûÌå¿ò¼ÜÒÆÖ²°üº¬ÁËKEEP ALIVE 2²¿·Ö£¬µ«ÊÇÎÒÃÇÑ§Ğ£²¢²»¶ÔÆä½øĞĞĞ£Ñé£¬ËùÒÔ¾ßÌå¹¤×÷Óë·ñÔİÎ´ÑéÖ¤,ËùÒÔÄ¿Ç°ÒÑ¾­²âÊÔµÄÄ£¿é°üÀ¨CLALLANGE SOCKET LOGIN KEEPALIVE1²¿·Ö
+ä¿®æ­£LOGINåŒ…å¯¹é½é—®é¢˜ï¼Œä¿®æ­£KL2è®¡æ•°é—®é¢˜,ç¦»çº¿æµ‹è¯•å‚æ•°offlinetestï¼Œåœ¨çº¿ä½¿ç”¨è¯·ç½®0
 
-´ÕºÏ¿´Çó±ğÍÂ²ÛÔüË®Æ½
+æ•´ä½“æ¡†æ¶ç§»æ¤åŒ…å«äº†KEEP ALIVE 2éƒ¨åˆ†ï¼Œä½†æ˜¯æˆ‘ä»¬å­¦æ ¡å¹¶ä¸å¯¹å…¶è¿›è¡Œæ ¡éªŒï¼Œæ‰€ä»¥å…·ä½“å·¥ä½œä¸å¦æš‚æœªéªŒè¯,æ‰€ä»¥ç›®å‰å·²ç»æµ‹è¯•çš„æ¨¡å—åŒ…æ‹¬CLALLANGE SOCKET LOGIN KEEPALIVE1éƒ¨åˆ†
+
+å‡‘åˆçœ‹æ±‚åˆ«åæ§½æ¸£æ°´å¹³
 
 ``gcc main.c md5.c -o drcom``
