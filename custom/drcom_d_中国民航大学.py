@@ -8,11 +8,11 @@ import random
 
 # CONFIG
 server = "192.168.100.251"
-username = ""
-password = ""
+username = "
+password = "
+host_ip = "10.5.155.177"
 host_name = "fuyumi"
 host_os = "Windows 8.1"
-host_ip = "" 
 dhcp_server = "0.0.0.0"
 mac = 0xb63d020c60fd
 CONTROLCHECKSTATUS = '\x20'
@@ -32,11 +32,12 @@ class LoginException (Exception):
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-s.bind(("0.0.0.0", 61440))
+s.bind(("0.0.0.0", 52431))
 
 s.settimeout(3)
 SALT = ''
 IS_TEST = True
+# IS_TEST = False
 # specified fields based on version
 CONF = "/etc/drcom.conf"
 if IS_TEST:
@@ -52,8 +53,9 @@ if IS_TEST:
 
 def log(*args, **kwargs):
     s = ' '.join(args)
+    s = time.strftime("%Y-%m-%d %X", time.localtime()) + s
     print s
-    if DEBUG:
+    if 0:
       with open(LOG_PATH,'a') as f:
           f.write(s + '\n')
 
@@ -67,7 +69,7 @@ def challenge(svr,ran):
       except:
         log('[challenge] timeout, retrying...')
         continue
-        
+
       if address == (svr, 61440):
         break
       else:
@@ -138,7 +140,7 @@ def keep_alive2(*args):
     packet = ''
     svr = server
     ran = random.randint(0,0xFFFF)
-    ran += random.randint(1,10)   
+    ran += random.randint(1,10)
     # 2014/10/15 add by latyas, maybe svr sends back a file packet
     svr_num = 0
     packet = keep_alive_package_builder(svr_num,dump(ran),'\x00'*4,1,True)
@@ -159,8 +161,8 @@ def keep_alive2(*args):
         else:
             log('[keep-alive2] recv1/unexpected',data.encode('hex'))
     #log('[keep-alive2] recv1',data.encode('hex'))
-    
-    ran += random.randint(1,10)   
+
+    ran += random.randint(1,10)
     packet = keep_alive_package_builder(svr_num, dump(ran),'\x00'*4,1,False)
     #log('[keep-alive2] send2',packet.encode('hex'))
     s.sendto(packet, (svr, 61440))
@@ -177,9 +179,9 @@ def keep_alive2(*args):
             log('[keep-alive2] recv2/unexpected',data.encode('hex'))
     #log('[keep-alive2] recv2',data.encode('hex'))
     tail = data[16:20]
-    
 
-    ran += random.randint(1,10)   
+
+    ran += random.randint(1,10)
     packet = keep_alive_package_builder(svr_num,dump(ran),tail,3,False)
     #log('[keep-alive2] send3',packet.encode('hex'))
     s.sendto(packet, (svr, 61440))
@@ -197,11 +199,11 @@ def keep_alive2(*args):
    # log('[keep-alive2] recv3',data.encode('hex'))
     tail = data[16:20]
     log("[keep-alive2] keep-alive2 loop was in daemon.")
-    
+
     i = svr_num
     while True:
       try:
-        ran += random.randint(1,10)   
+        ran += random.randint(1,10)
         packet = keep_alive_package_builder(i,dump(ran),tail,1,False)
         #log('DEBUG: keep_alive2,packet 4\n',packet.encode('hex'))
         log('[keep_alive2] send',str(i),packet.encode('hex'))
@@ -210,8 +212,8 @@ def keep_alive2(*args):
         log('[keep_alive2] recv',data.encode('hex'))
         tail = data[16:20]
         #log('DEBUG: keep_alive2,packet 4 return\n',data.encode('hex'))
-        
-        ran += random.randint(1,10)   
+
+        ran += random.randint(1,10)
         packet = keep_alive_package_builder(i+1,dump(ran),tail,3,False)
         #log('DEBUG: keep_alive2,packet 5\n',packet.encode('hex'))
         s.sendto(packet, (svr, 61440))
@@ -221,12 +223,12 @@ def keep_alive2(*args):
         tail = data[16:20]
         #log('DEBUG: keep_alive2,packet 5 return\n',data.encode('hex'))
         i = (i+2) % 0xFF
-        time.sleep(20)
+        time.sleep(5)
         keep_alive1(*args)
       except:
         pass
 
-    
+
 import re
 def checksum(s):
     ret = 1234
@@ -245,7 +247,7 @@ def mkpkt(salt, usr, pwd, mac):
     data += md5sum("\x01" + pwd + salt + '\x00'*4) #md52
     data += '\x01' # number of ip
     #data += '\x0a\x1e\x16\x11' #your ip address1, 10.30.22.17
-    data += ''.join([chr(int(i)) for i in host_ip.split('.')]) #x.x.x.x -> 
+    data += ''.join([chr(int(i)) for i in host_ip.split('.')]) #x.x.x.x ->
     data += '\00'*4 #your ipaddress 2
     data += '\00'*4 #your ipaddress 3
     data += '\00'*4 #your ipaddress 4
@@ -275,14 +277,14 @@ def mkpkt(salt, usr, pwd, mac):
     data += '\x00' # auto logout / default: False
     data += '\x00' # broadcast mode / default : False
     data += '\xe9\x13' #unknown, filled numbers randomly =w=
-    
+
     log('[mkpkt]',data.encode('hex'))
     return data
 
 def login(usr, pwd, svr):
     import random
     global SALT
- 
+
     i = 0
     while True:
         salt = challenge(svr,time.time()+random.randint(0xF,0xFF))
@@ -308,7 +310,7 @@ def login(usr, pwd, svr):
               sys.exit(1)
             else:
               continue
-            
+
     log('[login] login sent')
     #0.8 changed:
     return data[23:39]
@@ -351,7 +353,7 @@ def empty_socket_buffer():
 def daemon():
     with open('/var/run/jludrcom.pid','w') as f:
         f.write(str(os.getpid()))
-        
+
 def main():
     if not IS_TEST:
         daemon()
