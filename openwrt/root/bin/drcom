@@ -47,6 +47,8 @@ s.bind((bind_ip, 61440))
 
 s.settimeout(3)
 SALT = ''
+UNLIMITED_RETRY = True
+EXCEPTION = False
 
 def log(*args, **kwargs):
     s = ' '.join(args)
