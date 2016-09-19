@@ -1,0 +1,28 @@
+#!/bin/sh
+START=90
+
+drcom_up()
+{
+	config_get_bool enable config enable
+	if [ $enable ]; then
+	drcom &
+	echo "Dr.COM Client is working."
+	else
+	stop
+	rm /etc/config/drcom.conf
+	fi
+}
+
+start()
+{
+	config_load drcom
+	transdrcom
+	echo "drcom.conf completed."
+	drcom_up
+}
+
+stop()
+{
+	killall drcom
+	echo "Dr.COM Client was killed."
+}
