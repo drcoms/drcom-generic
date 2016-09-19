@@ -1,0 +1,32 @@
+#!/bin/sh
+curdir=/etc/config/drcom.conf
+rm $curdir
+touch $curdir
+server="server = '$(uci get drcom.config.server)'"
+username="username = '$(uci get drcom.config.username)'"
+password="password = '$(uci get drcom.config.password)'"
+host_name="host_name = '$(uci get drcom.config.host_name)'"
+host_os="host_os = '$(uci get drcom.config.host_os)'"
+host_ip="host_ip = '$(uci get drcom.config.host_ip)'"
+dhcp_server="dhcp_server = '$(uci get drcom.config.dhcp_server)'"
+mac="mac = $(uci get drcom.config.mac)"
+PRIMARY_DNS= "PRIMARY_DNS = '$(uci get drcom.config.PRIMARY_DNS)'"
+AUTH_VERSION="AUTH_VERSION = '$(uci get drcom.config.AUTH_VERSION)'"
+KEEP_ALIVE_VERSION="KEEP_ALIVE_VERSION = '$(uci get drcom.config.KEEP_ALIVE_VERSION)'"
+CONTROLCHECKSTATUS="CONTROLCHECKSTATUS = '$(uci get drcom.config.CONTROLCHECKSTATUS)'"
+ADAPTERNUM="ADAPTERNUM = '$(uci get drcom.config.ADAPTERNUM)'"
+IPDOG="IPDOG = '$(uci get drcom.config.IPDOG)'"
+echo $server >> $curdir
+echo $username >> $curdir
+echo $password >> $curdir
+echo $host_name >> $curdir
+echo $host_os >> $curdir
+echo $host_ip >> $curdir
+echo $dhcp_server >> $curdir
+echo $mac >> $curdir
+echo $PRIMARY_DNS >> $curdir
+echo $AUTH_VERSION >> $curdir
+echo $KEEP_ALIVE_VERSION >> $curdir
+echo $CONTROLCHECKSTATUS >> $curdir
+echo $ADAPTERNUM >> $curdir
+echo $IPDOG >> $curdir
