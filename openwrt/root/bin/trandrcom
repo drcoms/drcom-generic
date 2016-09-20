@@ -1,6 +1,5 @@
 #!/bin/sh
 curdir=/etc/config/drcom.conf
-rm $curdir
 touch $curdir
 server="server = '$(uci get drcom.config.server)'"
 username="username = '$(uci get drcom.config.username)'"
