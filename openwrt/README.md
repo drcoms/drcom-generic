@@ -1,7 +1,9 @@
 ##OpenWrt-Dr.COM
 -----
 ######当前root文件夹下为D版本，将luci存储的参数实现转换为py文件可获取的格式(默认位置在/etc/config/drcoom.conf下)，增加判断开启与关闭drcom控制脚本，依赖环境依然是python-mini，若手动覆盖安装python-mini后，运行时出现提示libz.so文件确实，请自行寻找并添加到/usr/lib文件夹下，并建立相应的软连接。
-
+#####这里提供一个NEWIFI-mini的固件，添加python-mini和drcom以及该目录下的LuCI界面
+https://github.com/23171580/LuCI-DrCOM
+newifi-mini-pandorabox-16.09-drcom-luci.bin
 #####其他版本如果要自行添加可以参照以下方法(以P版本作大体介绍)。
 首先修改
 ####root/usr/lib/lua/luci/model/cbi/drcom.lua
