@@ -23,6 +23,7 @@ AUTH_VERSION = '\x0a\x00'
 IPDOG = '\x01'
 # CONFIG_END
 
+ror_version = False
 nic_name = '' #Indicate your nic, e.g. 'eth0.2'.nic_name
 bind_ip = '0.0.0.0'
 
@@ -250,19 +251,19 @@ def checksum(s):
     return struct.pack('<I', ret)
 
 def mkpkt(salt, usr, pwd, mac):
-    data = '\x03\x01\x00'+chr(len(usr)+20)
-    data += md5sum('\x03\x01'+salt+pwd)
+    data = '\x03\x01\x00' + chr(len(usr) + 20)
+    data += md5sum('\x03\x01' + salt + pwd)
     data += usr.ljust(36, '\x00')
     data += CONTROLCHECKSTATUS
     data += ADAPTERNUM
-    data += dump(int(data[4:10].encode('hex'),16)^mac).rjust(6,'\x00') #mac xor md51
-    data += md5sum("\x01" + pwd + salt + '\x00'*4) #md52
+    data += dump(int(data[4:10].encode('hex'),16)^mac).rjust(6,' \x00') #mac xor md51
+    data += md5sum("\x01" + pwd + salt + '\x00' * 4) #md52
     data += '\x01' # number of ip
     #data += '\x0a\x1e\x16\x11' #your ip address1, 10.30.22.17
     data += ''.join([chr(int(i)) for i in host_ip.split('.')]) #x.x.x.x -> 
-    data += '\00'*4 #your ipaddress 2
-    data += '\00'*4 #your ipaddress 3
-    data += '\00'*4 #your ipaddress 4
+    data += '\00' * 4 #your ipaddress 2
+    data += '\00' * 4 #your ipaddress 3
+    data += '\00' * 4 #your ipaddress 4
     data += md5sum(data + '\x14\x00\x07\x0b')[:8] #md53
     data += IPDOG
     data += '\x00'*4 #delimeter
@@ -278,10 +279,10 @@ def mkpkt(salt, usr, pwd, mac):
     data += '\x02\x00\x00\x00' #os unknown
     data += host_os.ljust(32,'\x00')
     data += '\x00' * 96
-    #data += '\x01' + host_os.ljust(128, '\x00')
-    #data += '\x0a\x00\x00'+chr(len(pwd)) # \0x0a represents version of client, algorithm: DRCOM_VER + 100
-    #data += ror(md5sum('\x03\x01'+salt+pwd), pwd)
     data += AUTH_VERSION
+    if ror_version:
+        data += '\x00' + chr(len(pwd))
+        data += ror(md5sum('\x03\x01' + salt + pwd), pwd)
     data += '\x02\x0c'
     data += checksum(data+'\x01\x26\x07\x11\x00\x00'+dump(mac))
     data += '\x00\x00' #delimeter
