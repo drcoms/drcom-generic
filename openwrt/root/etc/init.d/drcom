@@ -1,28 +1,29 @@
-#!/bin/sh
+#!/bin/sh /etc/rc.common
 START=90
 
 drcom_up()
 {
-	config_get_bool enable config enable
+	local enable
+	config_get_bool enable $1 enable
 	if [ $enable ]; then
+	transdrcom
 	drcom &
-	echo "Dr.COM Client is working."
+	sleep 3
+	echo "Dr.COM Client is started"
 	else
 	stop
-	rm /etc/config/drcom.conf
 	fi
 }
 
 start()
 {
+	rm -rf /etc/config/drcom.conf
 	config_load drcom
-	transdrcom
-	echo "drcom.conf completed."
-	drcom_up
+	config_foreach drcom_up
 }
 
 stop()
 {
-	killall drcom
-	echo "Dr.COM Client was killed."
+	killall python /bin/drcom
+	echo "Dr.COM Client is stopped"
 }
