@@ -21,10 +21,10 @@
 接下来修改root/bin/transdrcom
 在相应末尾部位添加
 
-	pppoe_flag="pppoe_flag = '$(uci get drcom.config.pppoe_flag)'"
-	keep_alive2_flag="keep_alive2_flag = '$(uci get drcom.config.keep_alive2_flag)'"
-	echo $pppoe_flag >> $curdir
-	echo $keep_alive2_flag >> $curdir
+	tmp_pppoe_flag="pppoe_flag = '$(uci get drcom.@drcom[0].pppoe_flag)'"
+	tmp_keep_alive2_flag="keep_alive2_flag = '$(uci get drcom.@drcom[0].keep_alive2_flag)'"
+	echo $tmp_pppoe_flag >> $curdir
+	echo $tmp_keep_alive2_flag >> $curdir
 最后将P版本的latest-wired-pppoe.py文件移动到root/bin文件夹下，并重命名为drcom，修改赋予执行权限。
 以上修改完成之后，windows下直接通过winscp上传root目录下文件到根目录覆盖即可；
 linux下使用scp命令上传覆盖。
