@@ -1,0 +1,34 @@
+#!/bin/sh
+# Copyright (c) 2014 OpenWrt
+# Copyright (c) 2016 Sui <sun521xiaolei@gmail.com>
+curdir=/etc/config/drcom.conf
+touch $curdir
+tmp_server="server = '$(uci get drcom.@drcom[0].server)'"
+tmp_username="username = '$(uci get drcom.@drcom[0].username)'"
+tmp_password="password = '$(uci get drcom.@drcom[0].password)'"
+tmp_host_name="host_name = '$(uci get drcom.@drcom[0].host_name)'"
+tmp_host_os="host_os = '$(uci get drcom.@drcom[0].host_os)'"
+tmp_host_ip="host_ip = '$(uci get drcom.@drcom[0].host_ip)'"
+tmp_dhcp_server="dhcp_server = '$(uci get drcom.@drcom[0].dhcp_server)'"
+tmp_mac="mac = $(uci get drcom.@drcom[0].mac)"
+tmp_PRIMARY_DNS="PRIMARY_DNS = '$(uci get drcom.@drcom[0].PRIMARY_DNS)'"
+tmp_AUTH_VERSION="AUTH_VERSION = '$(uci get drcom.@drcom[0].AUTH_VERSION)'"
+tmp_KEEP_ALIVE_VERSION="KEEP_ALIVE_VERSION = '$(uci get drcom.@drcom[0].KEEP_ALIVE_VERSION)'"
+tmp_CONTROLCHECKSTATUS="CONTROLCHECKSTATUS = '$(uci get drcom.@drcom[0].CONTROLCHECKSTATUS)'"
+tmp_ADAPTERNUM="ADAPTERNUM = '$(uci get drcom.@drcom[0].ADAPTERNUM)'"
+tmp_IPDOG="IPDOG = '$(uci get drcom.@drcom[0].IPDOG)'"
+echo $tmp_server >> $curdir
+echo $tmp_username >> $curdir
+echo $tmp_password >> $curdir
+echo $tmp_host_name >> $curdir
+echo $tmp_host_os >> $curdir
+echo $tmp_host_ip >> $curdir
+echo $tmp_dhcp_server >> $curdir
+echo $tmp_mac >> $curdir
+echo $tmp_PRIMARY_DNS >> $curdir
+echo $tmp_AUTH_VERSION >> $curdir
+echo $tmp_KEEP_ALIVE_VERSION >> $curdir
+echo $tmp_CONTROLCHECKSTATUS >> $curdir
+echo $tmp_ADAPTERNUM >> $curdir
+echo $tmp_IPDOG >> $curdir
+

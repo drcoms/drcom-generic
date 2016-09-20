@@ -1,4 +1,4 @@
-config drcom ''
+config drcom
 	option enable ''
 	option server ''
 	option username ''
