@@ -16,7 +16,30 @@ end
 
 m = Map("drcom", translate("Dr.COM"), translate(client_status))
 
-s = m:section(TypedSection, "drcom", translate("客户端配置"))
+s = m:section(TypedSection, "drcom", translate("客户端配置"),
+translate("LuCI版本的Dr.COM配置.")..
+"<br />"
+..[[<br /><strong>]]
+..[[<a href="https://groups.google.com/d/forum/drcom-3rd-party-client" target="_blank">]]
+..translate("欢迎加入本项目的讨论组(注意：需要FQ)。")
+..[[</a>]]
+..[[</strong><br />]]
+..[[<br /><strong>]]
+..[[<a href="http://shang.qq.com/wpa/qunwpa?idkey=9ebf4aff87c485f5368f17fd670076efe74c1e2e9cb436d02c62c6a017d71f52" target="_blank">]]
+..translate("官方交流QQ群:318495368，欢迎加入。")
+..[[</a>]]
+..[[</strong><br />]]
+..[[<br /><strong>]]
+..[[<a href="https://github.com/drcoms" target="_blank">]]
+..translate("本项目在GitHub的项目地址。")
+..[[</a>]]
+..[[</strong><br />]]
+..[[<br /><strong>]]
+..[[<a href="https://github.com/drcoms/drcom-generic/tree/master/openwrt" target="_blank">]]
+..translate("查看本页面的相关自定义修改和配置说明。")
+..[[</a>]]
+..[[</strong><br />]]
+)
 s.anonymous = true
 
 enable = s:option(Flag, "enable", translate("开启Dr.com"))

@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/python
+# Copyright (c) 2014-2016, latyas <latyas@gmail.com>
+# Edit by Sui <sun521xiaolei@gmail.com>
 # -*- coding: utf-8 -*-
 import socket, struct, time
 from hashlib import md5
