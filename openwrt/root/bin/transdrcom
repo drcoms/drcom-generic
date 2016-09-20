@@ -1,7 +1,6 @@
 #!/bin/sh
 # Copyright (c) 2014 OpenWrt
-# Copyright (c) 2014-2016, latyas <latyas@gmail.com>
-# Copyright (c) 2016, Sui <sun521xiaolei@gmail.com>
+# Copyright (c) 2016 Sui <sun521xiaolei@gmail.com>
 curdir=/etc/config/drcom.conf
 touch $curdir
 tmp_server="server = '$(uci get drcom.@drcom[0].server)'"

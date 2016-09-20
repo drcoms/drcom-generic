@@ -1,5 +1,6 @@
 --[[
-Copyright reserved by latyas
+# Copyright (c) 2014-2016, latyas <latyas@gmail.com>
+# Edit by Sui <sun521xiaolei@gmail.com>
 ]]--
 require("luci.sys")
 local fs = require "nixio.fs"

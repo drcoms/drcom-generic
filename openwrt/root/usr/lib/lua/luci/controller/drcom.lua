@@ -1,5 +1,6 @@
 --[[
-RA-MOD
+# Copyright (c) 2014-2016, latyas <latyas@gmail.com>
+# Edit by Sui <sun521xiaolei@gmail.com>
 ]]--
 
 module("luci.controller.drcom", package.seeall)
