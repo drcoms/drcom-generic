@@ -256,7 +256,7 @@ def mkpkt(salt, usr, pwd, mac):
     data += usr.ljust(36, '\x00')
     data += CONTROLCHECKSTATUS
     data += ADAPTERNUM
-    data += dump(int(data[4:10].encode('hex'),16)^mac).rjust(6,' \x00') #mac xor md51
+    data += dump(int(data[4:10].encode('hex'),16)^mac).rjust(6,'\x00') #mac xor md51
     data += md5sum("\x01" + pwd + salt + '\x00' * 4) #md52
     data += '\x01' # number of ip
     #data += '\x0a\x1e\x16\x11' #your ip address1, 10.30.22.17
