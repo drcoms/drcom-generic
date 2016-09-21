@@ -9,7 +9,7 @@ drcom_up()
 	if [ $enable ]; then
 	transdrcom
 	drcom &
-	sleep 3
+	sleep 5
 	echo "Dr.COM Client is started"
 	else
 	stop
@@ -18,13 +18,22 @@ drcom_up()
 
 start()
 {
+	sleep 10
 	rm -rf /etc/config/drcom.conf
 	config_load drcom
-	config_foreach drcom_up
+	config_foreach drcom_up drcom
 }
 
 stop()
 {
-	killall python /bin/drcom
+	kill -9 `ps | grep drcom | grep python | awk '{print $1}'`
 	echo "Dr.COM Client is stopped"
+}
+
+restart()
+{
+	stop
+	rm -rf /etc/config/drcom.conf
+	config_load drcom
+	config_foreach drcom_up drcom
 }
