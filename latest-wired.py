@@ -115,12 +115,12 @@ def dump(n):
         s = '0' + s
     return s.decode('hex')
 
-# def ror(md5, pwd):
-#     ret = ''
-#     for i in range(len(pwd)):
-#         x = ord(md5[i]) ^ ord(pwd[i])
-#         ret += chr(((x<<3)&0xFF) + (x>>5))
-#     return ret
+def ror(md5, pwd):
+    ret = ''
+    for i in range(len(pwd)):
+        x = ord(md5[i]) ^ ord(pwd[i])
+        ret += chr(((x<<3)&0xFF) + (x>>5))
+    return ret
 
 def keep_alive_package_builder(number,random,tail,type=1,first=False):
     data = '\x07'+ chr(number) + '\x28\x00\x0b' + chr(type)
