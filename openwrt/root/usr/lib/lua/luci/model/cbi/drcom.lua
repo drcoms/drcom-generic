@@ -96,7 +96,7 @@ IPDOG.default = "\x01"
 
 local apply = luci.http.formvalue("cbi.apply")
 if apply then
-    io.popen("/etc/init.d/drcom start")
+    io.popen("/etc/init.d/drcom restart")
 end
 
 return m
