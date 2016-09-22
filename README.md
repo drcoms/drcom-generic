@@ -22,11 +22,11 @@
 #### 黑科技：drcom client on 8266
 <http://obaka.moe/hei-ke-ji-esp8266rang-ni-bai-tuo-drcomke-hu-duan.html>
 
-#### drcom_2011.lua
+#### drcom_2016.lua
 这是一个由 *googlecode* 上 *jdrcom* 项目中的 *wireshark* 插件 <br>
 项目地址：(https://code.google.com/p/jdrcom/) <br>
 使用(for windows):
-> 将 *drcom_2011.lua* 放到 *Wireshark.exe* 所在的目录下， 打开 *init.lua* ，在 `dofile(DATA_DIR.."console.lua")` 之后添加 `dofile(DATA_DIR.."drcom_2011.lua")`.
+> 将 *drcom_2016.lua* 放到 *Wireshark.exe* 所在的目录下， 打开 *init.lua* ，在 `dofile(DATA_DIR.."console.lua")` 之后添加 `dofile(DATA_DIR.."drcom_2016.lua")`.
 
 之后就可以在过滤器中使用 *drcom* 协议了。
 
