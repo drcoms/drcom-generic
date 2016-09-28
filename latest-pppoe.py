@@ -61,7 +61,7 @@ def gbk2utf8(string):
 class Socket:
     def __init__(self, server, port=61440):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        # self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind(("0.0.0.0", 61440))
         log("open local port:" + str(port))
         log("DEBUG MODE:"+ str(DEBUG))
