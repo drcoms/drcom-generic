@@ -1,22 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-I want to express my great thanks to the following friends
-they brought me hope of this version (in QQ Group 318495368)
-
-@Countdown to Heaven
-@djj
-"""
 import socket
 import struct
 import time
 import sys
 import random
 import os
+import hashlib
 
 # CONFIG
-server = '61.142.108.96'
-pppoe_flag = '\x00'
+server = '172.30.1.80'
+pppoe_flag = '\x2a'
 keep_alive2_flag = '\xdc'
 # CONFIG_END
 
@@ -41,7 +35,6 @@ def log(*args, **kwargs):
                 f.write('\n')
             except:
                 f.write('FUCK WINDOWS' + '\n')
-
 def dump(n):
     s = '%x' % n
     if len(s) & 1:
@@ -57,6 +50,49 @@ def gbk2utf8(string):
             return string.decode('gb2312')
     except Exception as e:
         return 'You have witnessed too much...'
+
+def gen_crc(data, encrypt_type):
+    DRCOM_DIAL_EXT_PROTO_CRC_INIT = 20000711
+    ret = ''
+    if encrypt_type == 0:
+        # 加密方式无
+        return struct.pack('<I',DRCOM_DIAL_EXT_PROTO_CRC_INIT) + struct.pack('<I',126), False
+    elif encrypt_type == 1:
+        # 加密方式为 md5
+        foo = hashlib.md5(data).digest()
+        ret += foo[2]
+        ret += foo[3]
+        ret += foo[8]
+        ret += foo[9]
+        ret += foo[5]
+        ret += foo[6]
+        ret += foo[13]
+        ret += foo[14]
+        return ret, True
+    elif encrypt_type == 2:
+        # md4
+        foo = hashlib.new('md4', data).digest()
+        ret += foo[1]
+        ret += foo[2]
+        ret += foo[8]
+        ret += foo[9]
+        ret += foo[4]
+        ret += foo[5]
+        ret += foo[11]
+        ret += foo[12]
+        return ret, True
+    elif encrypt_type == 3:
+        # sha1
+        foo = hashlib.sha1(data).digest()
+        ret += foo[2]
+        ret += foo[3]
+        ret += foo[9]
+        ret += foo[10]
+        ret += foo[5]
+        ret += foo[6]
+        ret += foo[15]
+        ret += foo[16]
+        return ret, True
 
 class Socket:
     def __init__(self, server, port=61440):
@@ -116,14 +152,20 @@ class PPPOEHeartbeat:
         data += '\x00\x00\x00\x00\x00\x00' # mac
         data += sip # AuthHostIP
         if first:
-            data += '\x00\x62\x00' + pppoe_flag # 非第一次则是 data += '\x00\x62\x00\x14' 
+            data += '\x00\x62\x00' + pppoe_flag # 非第一次则是 data += '\x00\x62\x00\x14'
         else:
             data += '\x00\x63\x00' + pppoe_flag
         data += challenge_seed # Challenge Seed
-        data += struct.pack('<I',20000711) # DRCOM_DIAL_EXT_PROTO_CRC_INIT
-        data += struct.pack('<I',126)
-        crc = (self._DrcomCRC32(data) * 19680126) & 0xFFFFFFFF
-        data = data[:-8] + struct.pack('<I', crc) + '\x00\x00\x00\x00'
+
+        #data += struct.pack('<I',20000711) # DRCOM_DIAL_EXT_PROTO_CRC_INIT
+        #data += struct.pack('<I',126)
+        #crc = (self._DrcomCRC32(data) * 19680126) & 0xFFFFFFFF
+        encrypt_mode = struct.unpack('<I', challenge_seed)[0] & 3
+        crc, foo = gen_crc(challenge_seed, encrypt_mode)
+        data += crc
+        if foo == False:
+            crc2 = (DrcomCRC32(data) * 19680126) & 0xFFFFFFFF
+            data = data[:-8] + struct.pack('<I', crc2) + '\x00\x00\x00\x00'
         # data += '\x7e\x00\x00\x00'
         #   data += '\x00\x00\x00\x7e'
         # - DrcomDialExtProtoHeader end -
@@ -144,7 +186,7 @@ class PPPOEHeartbeat:
 
             self.count += 1
             self.count %= 0xFF
-            
+
             #2. heartbeat
             seed = data[8:12]
             sip = data[12:16]
@@ -176,27 +218,30 @@ def keep_alive_package_builder(number,random,tail,type=1,first=False):
         data += keep_alive2_flag + '\x02'
     data += '\x2f\x12' + '\x00' * 6
     data += tail
-    data += '\x00' * 4
+    #data += '\x00' * 4
     #data += struct.pack("!H",0xdc02)
     if type == 3:
-        foo = ''.join([chr(int(i)) for i in host_ip.split('.')]) # host_ip
+        print('type == 3')
+        foo = ''.join([chr(int(i)) for i in '0.0.0.0'.split('.')]) # host_ip
         #CRC
         # edited on 2014/5/12, filled zeros to checksum
         # crc = packet_CRC(data+foo)
-        crc = '\x00' * 4
+        encrypt_mode = struct.unpack('<I', tail)[0] & 3
+        crc, val = gen_crc(data, encrypt_mode)
+        #crc = '\x00' * 4
         #data += struct.pack("!I",crc) + foo + '\x00' * 8
         data += crc + foo + '\x00' * 8
     else: #packet type = 1
-        data += '\x00' * 16
+        data += '\x00' * 20
     return data
 
 def keep_alive2(s, pppoe):
     tail = ''
     packet = ''
     svr = server
-    
+
     ran = random.randint(0,0xFFFF)
-    ran += random.randint(1,10)   
+    ran += random.randint(1,10)
     # 2014/10/15 add by latyas, maybe svr sends back a file packet
     svr_num = 0
     packet = keep_alive_package_builder(svr_num,dump(ran),'\x00'*4,1,True)
@@ -213,8 +258,8 @@ def keep_alive2(s, pppoe):
         else:
             log('[keep-alive2] recv1/unexpected', pkt=data)
     log('[keep-alive2] recv1', pkt=data)
-    
-    ran += random.randint(1,10)   
+
+    ran += random.randint(1,10)
     packet = keep_alive_package_builder(svr_num, dump(ran),'\x00'*4,1,False)
     log('[keep-alive2] send2', pkt=packet)
     s.sendto(packet, (svr, 61440))
@@ -227,9 +272,9 @@ def keep_alive2(s, pppoe):
             log('[keep-alive2] recv2/unexpected', pkt=data)
     log('[keep-alive2] recv2', pkt=data)
     tail = data[16:20]
-    
 
-    ran += random.randint(1,10)   
+
+    ran += random.randint(1,10)
     packet = keep_alive_package_builder(svr_num,dump(ran),tail,3,False)
     log('[keep-alive2] send3', pkt=packet)
     s.sendto(packet, (svr, 61440))
@@ -243,19 +288,19 @@ def keep_alive2(s, pppoe):
     log('[keep-alive2] recv3', pkt=data)
     tail = data[16:20]
     log("[keep-alive2] keep-alive2 loop was in daemon.")
-    
+
     i = svr_num
     while True:
         try:
-            ran += random.randint(1,10)   
+            ran += random.randint(1,10)
             packet = keep_alive_package_builder(i,dump(ran),tail,1,False)
             log('[keep_alive2] send',str(i), pkt=packet)
             s.sendto(packet, (svr, 61440))
             data, address = s.recvfrom(1024)
             log('[keep_alive2] recv', pkt=data)
             tail = data[16:20]
-        
-            ran += random.randint(1,10)   
+
+            ran += random.randint(1,10)
             packet = keep_alive_package_builder(i+1,dump(ran),tail,3,False)
             s.sendto(packet, (svr, 61440))
             log('[keep_alive2] send',str(i+1), pkt=packet)
@@ -277,9 +322,12 @@ def main():
     if not IS_TEST:
         daemon()
         execfile(CONF, globals())
-    log('auth svr:' + server + '\npppoe_flag:' + pppoe_flag.encode('hex') + '\nkeep_alive2_flag:' + keep_alive2_flag.encode('hex'))
+    log('auth svr: ' + server)
+    log('pppoe_flag: ' + pppoe_flag.encode('hex'))
+    log('keep_alive2_flag: ' + keep_alive2_flag.encode('hex'))
+
+    s = Socket(server)
     while True:
-        s = Socket(server)
         pppoe = PPPOEHeartbeat(1)
         pppoe.send(s)
         keep_alive2(s, pppoe)
