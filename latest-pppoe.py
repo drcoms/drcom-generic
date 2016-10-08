@@ -221,7 +221,7 @@ def keep_alive_package_builder(number,random,tail,type=1,first=False):
     #data += '\x00' * 4
     #data += struct.pack("!H",0xdc02)
     if type == 3:
-        print('type == 3')
+        # print('type == 3')
         foo = ''.join([chr(int(i)) for i in '0.0.0.0'.split('.')]) # host_ip
         #CRC
         # edited on 2014/5/12, filled zeros to checksum
