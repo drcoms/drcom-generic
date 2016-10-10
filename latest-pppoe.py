@@ -164,7 +164,7 @@ class PPPOEHeartbeat:
         crc, foo = gen_crc(challenge_seed, encrypt_mode)
         data += crc
         if foo == False:
-            crc2 = (DrcomCRC32(data) * 19680126) & 0xFFFFFFFF
+            crc2 = (self._DrcomCRC32(data) * 19680126) & 0xFFFFFFFF
             data = data[:-8] + struct.pack('<I', crc2) + '\x00\x00\x00\x00'
         # data += '\x7e\x00\x00\x00'
         #   data += '\x00\x00\x00\x7e'
