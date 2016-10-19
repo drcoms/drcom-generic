@@ -21,9 +21,9 @@ ADAPTERNUM = '\x01'
 KEEP_ALIVE_VERSION = '\xdc\x02'
 AUTH_VERSION = '\x0a\x00'
 IPDOG = '\x01'
+ror_version = False
 # CONFIG_END
 
-ror_version = False
 nic_name = '' #Indicate your nic, e.g. 'eth0.2'.nic_name
 bind_ip = '0.0.0.0'
 
@@ -240,7 +240,6 @@ def keep_alive2(*args):
             keep_alive1(*args)
         except:
             pass
-
     
 import re
 def checksum(s):
@@ -256,7 +255,7 @@ def mkpkt(salt, usr, pwd, mac):
     data += usr.ljust(36, '\x00')
     data += CONTROLCHECKSTATUS
     data += ADAPTERNUM
-    data += dump(int(data[4:10].encode('hex'),16)^mac).rjust(6,'\x00') #mac xor md51
+    data += dump(int(data[4:10].encode('hex'),16)^mac).rjust(6, '\x00') #mac xor md51
     data += md5sum("\x01" + pwd + salt + '\x00' * 4) #md52
     data += '\x01' # number of ip
     #data += '\x0a\x1e\x16\x11' #your ip address1, 10.30.22.17
@@ -264,7 +263,7 @@ def mkpkt(salt, usr, pwd, mac):
     data += '\00' * 4 #your ipaddress 2
     data += '\00' * 4 #your ipaddress 3
     data += '\00' * 4 #your ipaddress 4
-    data += md5sum(data + '\x14\x00\x07\x0b')[:8] #md53
+    data += md5sum(data + '\x14\x00\x07\x0B')[:8] #md53
     data += IPDOG
     data += '\x00'*4 #delimeter
     data += host_name.ljust(32, '\x00')
@@ -275,21 +274,21 @@ def mkpkt(salt, usr, pwd, mac):
     data += '\x94\x00\x00\x00' # unknow
     data += '\x05\x00\x00\x00' # os major
     data += '\x01\x00\x00\x00' # os minor
-    data += '\x28\x0a\x00\x00' # OS build
+    data += '\x28\x0A\x00\x00' # OS build
     data += '\x02\x00\x00\x00' #os unknown
-    data += host_os.ljust(32,'\x00')
+    data += host_os.ljust(32, '\x00')
     data += '\x00' * 96
     data += AUTH_VERSION
     if ror_version:
         data += '\x00' + chr(len(pwd))
         data += ror(md5sum('\x03\x01' + salt + pwd), pwd)
-    data += '\x02\x0c'
-    data += checksum(data+'\x01\x26\x07\x11\x00\x00'+dump(mac))
+    data += '\x02\x0C'
+    data += checksum(data + '\x01\x26\x07\x11\x00\x00' + dump(mac))
     data += '\x00\x00' #delimeter
     data += dump(mac)
     data += '\x00' # auto logout / default: False
     data += '\x00' # broadcast mode / default : False
-    data += '\xe9\x13' #unknown, filled numbers randomly =w=
+    data += '\xE9\x13' #unknown, filled numbers randomly =w=
     
     log('[mkpkt]',data.encode('hex'))
     return data
@@ -369,8 +368,8 @@ def main():
     if not IS_TEST:
         daemon()
         execfile(CONF, globals())
-    log("auth svr:"+server+"\nusername:"+username+"\npassword:"+password+"\nmac:"+str(hex(mac)))
-    log(bind_ip)
+    log("auth svr: " + server + "\nusername: " + username + "\npassword: " + password + "\nmac: " + str(hex(mac)))
+    log("bind ip: " + bind_ip)
     while True:
       try:
         package_tail = login(username, password, server)
