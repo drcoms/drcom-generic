@@ -54,7 +54,7 @@ $(document).ready(function() {
     $('#config-generate').click(function() {
         var gen = '';
         for (var i = 0; i < params[0].length; i++) {
-            if (params[0][i] == 'mac'){
+            if (params[0][i] == 'mac' || params[0][i] == 'ror_version'){
                 gen += (params[0][i] + ' = ' + params[1][i] + '\n');
             } else {
                 gen += (params[0][i] + ' = \'' + params[1][i] + '\'\n');
