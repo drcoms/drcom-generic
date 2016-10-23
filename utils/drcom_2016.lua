@@ -134,6 +134,7 @@ do --do...end是Lua语言的语句块关键字
 	pf.f_onlinetime =   ProtoField.uint32("drcom.onlinetime","Online Time in Seconds",base.DEC)
 	pf.f_someflux = ProtoField.uint32("drcom.someflux","some flux?",base.DEC)
 	pf.f_time2 =    ProtoField.uint32("drcom.time2","some time2 in seconds",base.DEC)
+	pf.f_clientversion =  ProtoField.bytes("drcom.clientversion","Client Version")
 	pf.f_1000 =     ProtoField.uint16("drcom.1000","Carry per 1000 setp ?",base.DEC)
 	pf.f_file   =   ProtoField.bytes("drcom.file","File Content")
 	pf.f_monthflux =    ProtoField.float("drcom.monthflux","Month used flux(MB)")
@@ -289,6 +290,7 @@ do --do...end是Lua语言的语句块关键字
 		if buf(2,2):uint() == 0x2800 then
 		pkt.cols.info:append(", "..t_misctype[buf(5,1):uint()])
 		subtree:add(pf.f_misctype,buf(5,1))
+		subtree:add(pf.f_clientversion,buf(6,2))
 		subtree:add_le(pf.f_1000,buf(8,2))
 		subtree:add_le(pf.f_time2,buf(10,4))
 		subtree:add_le(pf.f_someflux,buf(16,4))
@@ -308,6 +310,7 @@ do --do...end是Lua语言的语句块关键字
 		elseif buf(2,2):uint() == 0x1001 then   --File
 		subtree:add_le(pf.f_1000,buf(8,2))
 		subtree:add_le(pf.f_time2,buf(10,4))
+		subtree:add(pf.f_clientversion,buf(6,2))
 		subtree:add(pf.f_mm,buf(16,16))
 		subtree:add_le(pf.f_file,buf(32,buf():len()-32))
 		elseif buf(2,2):uint() == 0xf400 then
