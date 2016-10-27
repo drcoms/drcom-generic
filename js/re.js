@@ -62,7 +62,7 @@ $(document).ready(function() {
         };
         gen = gen.slice(0, -1);
         var blob = new Blob([gen], {type: "text/plain;charset=utf-8"});
-        saveAs(blob, 'drcom.conf');
+        saveAs(blob, 'drcom.conf', true);
     });
     
     $('#edit').click(function() {
