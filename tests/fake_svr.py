@@ -31,7 +31,7 @@ def receive_challenge(challenge_seed, MM):
     data, addr = s.recvfrom(1024)
     if addr == test_svr:
         print('> Received: ' + data.encode('hex'))
-        if (re.match('\x01\x02[\x00-\xFF]{2}\x09[\x00]{15}', data)):
+        if (re.match('\x01\x02[\x00-\xFF]{3}[\x00]{15}', data)):
             print('>>> Challenge packet received.')
             s.sendto('\x02\x01\x11\x22' + challenge_seed + ''.join([chr(int(i)) for i in host_ip.split('.')]) + '\xF0\x00' + MM + '\x00' * 34, test_svr)
             return 1
