@@ -4,14 +4,14 @@ import socket
 import re
 
 # CONFIG
-server = "192.168.1.14"
-username = "a"
-password = "a"
-host_name = "LIYUANYUAN"
-host_os = "8089D"
-host_ip = "10.30.22.17"
-PRIMARY_DNS = "114.114.114.114"
-dhcp_server = "0.0.0.0"
+server = '192.168.1.14'
+username = 'a'
+password = 'a'
+host_name = 'LIYUANYUAN'
+host_os = '8089D'
+host_ip = '10.30.22.17'
+PRIMARY_DNS = '114.114.114.114'
+dhcp_server = '0.0.0.0'
 mac = 0xb888e3051680
 CONTROLCHECKSTATUS = '\x20'
 ADAPTERNUM = '\x01'
@@ -33,7 +33,8 @@ def receive_challenge(challenge_seed, MM):
         print('> Received: ' + data.encode('hex'))
         if (re.match('\x01\x02[\x00-\xFF]{3}[\x00]{15}', data)):
             print('>>> Challenge packet received.')
-            s.sendto('\x02\x01\x11\x22' + challenge_seed + ''.join([chr(int(i)) for i in host_ip.split('.')]) + '\xF0\x00' + MM + '\x00' * 34, test_svr)
+            seed = data[2:4]
+            s.sendto('\x02\x01' + seed + challenge_seed + '\x00' * 12 + ''.join([chr(int(i)) for i in host_ip.split('.')]) + '\xF0\x00' + MM + '\x00' * 34, test_svr)
             return 1
         else:
             print('>>> Unknown packet in challenge.')
@@ -91,6 +92,7 @@ def main():
         while 1:
             receive_keepalive1(Auth_Information, MM)
             receive_keepalive2(MM, someflux)
+
 
 if __name__ == '__main__':
     main()
