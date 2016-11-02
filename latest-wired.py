@@ -241,12 +241,12 @@ def keep_alive2(*args):
             i = (i+2) % 0xFF
         except:
             pass
-    
-import re
+
 def checksum(s):
     ret = 1234
-    for i in re.findall('....', s):
-        ret ^= int(i[::-1].encode('hex'), 16)
+    x = 0
+    for i in [x*4 for x in range(0, -(-len(s)//4))]:
+        ret ^= int(s[i:i+4].ljust(4, '\x00')[::-1].encode('hex'), 16)
     ret = (1968 * ret) & 0xffffffff
     return struct.pack('<I', ret)
 
