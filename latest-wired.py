@@ -283,10 +283,23 @@ def mkpkt(salt, usr, pwd, mac):
     if ror_version:
         data += '\x00' + chr(len(pwd))
         data += ror(md5sum('\x03\x01' + salt + pwd), pwd)
-    data += '\x02\x0C'
-    data += checksum(data + '\x01\x26\x07\x11\x00\x00' + dump(mac))
-    data += '\x00\x00' #delimeter
-    data += dump(mac)
+    '''
+struct  _tagDrcomAuthExtData
+{
+    unsigned char Code;
+    unsigned char Len;
+    unsigned long CRC;
+    unsigned short Option;
+    unsigned char AdapterAddress[MAC_LEN];
+};
+    '''
+    data += '\x02' # _tagDrcomAuthExtData.Code
+    data += '\x0C' # _tagDrcomAuthExtData.Len
+    data += checksum(data + '\x01\x26\x07\x11\x00\x00' + dump(mac)) # _tagDrcomAuthExtData.CRC
+    data += '\x00\x00' # _tagDrcomAuthExtData.Option
+    data += dump(mac) # _tagDrcomAuthExtData.AdapterAddress
+    # END OF _tagDrcomAuthExtData
+
     data += '\x00' # auto logout / default: False
     data += '\x00' # broadcast mode / default : False
     data += '\xE9\x13' #unknown, filled numbers randomly =w=
