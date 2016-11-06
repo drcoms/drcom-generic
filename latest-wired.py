@@ -342,14 +342,14 @@ def mkpkt(salt, usr, pwd, mac):
         data += chr(len(pwd)) # _tagLDAPAuth.PasswordLen
         data += ror(md5sum('\x03\x01' + salt + pwd), pwd) # _tagLDAPAuth.Password
     '''
-struct  _tagDrcomAuthExtData
-{
-    unsigned char Code;
-    unsigned char Len;
-    unsigned long CRC;
-    unsigned short Option;
-    unsigned char AdapterAddress[MAC_LEN];
-};
+	struct  _tagDrcomAuthExtData
+	{
+	    unsigned char Code;
+	    unsigned char Len;
+	    unsigned long CRC;
+	    unsigned short Option;
+	    unsigned char AdapterAddress[MAC_LEN];
+	};
     '''
     data += '\x02' # _tagDrcomAuthExtData.Code
     data += '\x0C' # _tagDrcomAuthExtData.Len
