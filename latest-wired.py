@@ -281,8 +281,17 @@ def mkpkt(salt, usr, pwd, mac):
     data += '\x00' * 96
     data += AUTH_VERSION
     if ror_version:
-        data += '\x00' + chr(len(pwd))
-        data += ror(md5sum('\x03\x01' + salt + pwd), pwd)
+        '''
+	struct  _tagLDAPAuth
+	{
+	    unsigned char Code;
+	    unsigned char PasswordLen;
+	    unsigned char Password[MD5_LEN];
+	};
+        '''
+        data += '\x00' # _tagLDAPAuth.Code
+        data += chr(len(pwd)) # _tagLDAPAuth.PasswordLen
+        data += ror(md5sum('\x03\x01' + salt + pwd), pwd) # _tagLDAPAuth.Password
     '''
 struct  _tagDrcomAuthExtData
 {
