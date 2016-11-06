@@ -19,6 +19,11 @@ mac = 0xb888e3051680
 CONTROLCHECKSTATUS = '\x20'
 ADAPTERNUM = '\x01'
 KEEP_ALIVE_VERSION = '\xdc\x02'
+'''
+AUTH_VERSION:
+    unsigned char ClientVerInfoAndInternetMode;
+    unsigned char DogVersion;
+'''
 AUTH_VERSION = '\x0a\x00'
 IPDOG = '\x01'
 ror_version = False
@@ -251,6 +256,26 @@ def checksum(s):
     return struct.pack('<I', ret)
 
 def mkpkt(salt, usr, pwd, mac):
+    '''
+	struct  _tagLoginPacket
+	{
+	    struct _tagDrCOMHeader Header;
+	    unsigned char PasswordMd5[MD5_LEN];
+	    char Account[ACCOUNT_MAX_LEN];
+	    unsigned char ControlCheckStatus;
+	    unsigned char AdapterNum;
+	    unsigned char MacAddrXORPasswordMD5[MAC_LEN];
+	    unsigned char PasswordMd5_2[MD5_LEN];
+	    unsigned char HostIpNum;
+	    unsigned int HostIPList[HOST_MAX_IP_NUM];
+	    unsigned char HalfMD5[8];
+	    unsigned char DogFlag;
+	    unsigned int unkown2;
+	    struct _tagHostInfo HostInfo;
+	    unsigned char ClientVerInfoAndInternetMode;
+	    unsigned char DogVersion;
+	};
+    '''
     data = '\x03\x01\x00' + chr(len(usr) + 20)
     data += md5sum('\x03\x01' + salt + pwd)
     data += usr.ljust(36, '\x00')
@@ -259,26 +284,50 @@ def mkpkt(salt, usr, pwd, mac):
     data += dump(int(data[4:10].encode('hex'),16)^mac).rjust(6, '\x00') #mac xor md51
     data += md5sum("\x01" + pwd + salt + '\x00' * 4) #md52
     data += '\x01' # number of ip
-    #data += '\x0a\x1e\x16\x11' #your ip address1, 10.30.22.17
     data += ''.join([chr(int(i)) for i in host_ip.split('.')]) #x.x.x.x -> 
     data += '\00' * 4 #your ipaddress 2
     data += '\00' * 4 #your ipaddress 3
     data += '\00' * 4 #your ipaddress 4
     data += md5sum(data + '\x14\x00\x07\x0B')[:8] #md53
     data += IPDOG
-    data += '\x00'*4 #delimeter
-    data += host_name.ljust(32, '\x00')
-    data += ''.join([chr(int(i)) for i in PRIMARY_DNS.split('.')]) #primary dns
-    data += ''.join([chr(int(i)) for i in dhcp_server.split('.')]) #DHCP server
-    data += '\x00\x00\x00\x00' #secondary dns:0.0.0.0
-    data += '\x00' * 8 #delimeter
-    data += '\x94\x00\x00\x00' # unknow
-    data += '\x05\x00\x00\x00' # os major
-    data += '\x01\x00\x00\x00' # os minor
-    data += '\x28\x0A\x00\x00' # OS build
-    data += '\x02\x00\x00\x00' #os unknown
+    data += '\x00'*4 # unknown2
+    '''
+	struct  _tagOSVERSIONINFO
+	{
+	    unsigned int OSVersionInfoSize;
+	    unsigned int MajorVersion;
+	    unsigned int MinorVersion;
+	    unsigned int BuildNumber;
+	    unsigned int PlatformID;
+	    char ServicePack[128];
+	};
+	struct  _tagHostInfo
+	{
+	    char HostName[HOST_NAME_MAX_LEN];
+	    unsigned int DNSIP1;
+	    unsigned int DHCPServerIP;
+	    unsigned int DNSIP2;
+	    unsigned int WINSIP1;
+	    unsigned int WINSIP2;
+	    struct _tagDrCOM_OSVERSIONINFO OSVersion;
+	};
+    '''
+    data += host_name.ljust(32, '\x00') # _tagHostInfo.HostName
+    data += ''.join([chr(int(i)) for i in PRIMARY_DNS.split('.')]) # _tagHostInfo.DNSIP1
+    data += ''.join([chr(int(i)) for i in dhcp_server.split('.')]) # _tagHostInfo.DHCPServerIP
+    data += '\x00\x00\x00\x00' # _tagHostInfo.DNSIP2
+    data += '\x00' * 4 # _tagHostInfo.WINSIP1
+    data += '\x00' * 4 # _tagHostInfo.WINSIP2
+    data += '\x94\x00\x00\x00' # _tagHostInfo.OSVersion.OSVersionInfoSize
+    data += '\x05\x00\x00\x00' # _tagHostInfo.OSVersion.MajorVersion
+    data += '\x01\x00\x00\x00' # _tagHostInfo.OSVersion.MinorVersion
+    data += '\x28\x0A\x00\x00' # _tagHostInfo.OSVersion.BuildNumber
+    data += '\x02\x00\x00\x00' # _tagHostInfo.OSVersion.PlatformID
+    # _tagHostInfo.OSVersion.ServicePack
     data += host_os.ljust(32, '\x00')
     data += '\x00' * 96
+    # END OF _tagHostInfo
+
     data += AUTH_VERSION
     if ror_version:
         '''
