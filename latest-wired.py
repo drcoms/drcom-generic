@@ -202,7 +202,7 @@ def keep_alive2(*args):
             log('[keep-alive2] recv2/unexpected',data.encode('hex'))
     log('[keep-alive2] recv2',data.encode('hex'))
     tail = data[16:20]
-    
+
 
     ran += random.randint(1,10)   
     packet = keep_alive_package_builder(svr_num,dump(ran),tail,3,False)
@@ -361,14 +361,14 @@ def mkpkt(salt, usr, pwd, mac):
     data += '\x00' # auto logout / default: False
     data += '\x00' # broadcast mode / default : False
     data += '\xE9\x13' #unknown, filled numbers randomly =w=
-    
+
     log('[mkpkt]',data.encode('hex'))
     return data
 
 def login(usr, pwd, svr):
     import random
     global SALT
- 
+
     i = 0
     while True:
         salt = challenge(svr,time.time()+random.randint(0xF,0xFF))
@@ -396,7 +396,7 @@ def login(usr, pwd, svr):
                 sys.exit(1)
             else:
                 continue
-            
+
     log('[login] login sent')
     #0.8 changed:
     return data[23:39]
@@ -440,7 +440,7 @@ def main():
     if not IS_TEST:
         daemon()
         execfile(CONF, globals())
-    log("auth svr: " + server + "\nusername: " + username + "\npassword: " + password + "\nmac: " + str(hex(mac)))
+    log("auth svr: " + server + "\nusername: " + username + "\npassword: " + password + "\nmac: " + str(hex(mac))[:-1])
     log("bind ip: " + bind_ip)
     while True:
       try:
