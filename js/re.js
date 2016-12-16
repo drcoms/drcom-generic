@@ -2,16 +2,16 @@
 
 var params;
 
-$(document).ready(function() {
+$(document).ready(function () {
     $('.button-collapse').sideNav();
     $('.dropdown-button').dropdown();
     $('.modal-trigger').leanModal();
 
-    $('#file-upload').click(function() {
-        fileupload(function(file) {
+    $('#file-upload').click(function () {
+        fileupload(function (file) {
         if (file) {
             var reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 var data = e.target.result;
                 if ($('.table').is('#panel_d')) {
                     params = re_d(data);
@@ -19,12 +19,12 @@ $(document).ready(function() {
                     params = re_p(data);
                 };
             }
-            reader.readAsText(file, 'utf-16be');
+            reader.readAsArrayBuffer(file);
         }
     }, '.pcapng');
     });
 
-    $('.modal-trigger').click(function() {
+    $('.modal-trigger').click(function () {
         var print = '';
         var clip = '';
         for (var i = 0; i < params[0].length; i++) {
@@ -45,13 +45,13 @@ $(document).ready(function() {
 
         $('#clipboard_print').html(print);
         var clipboard = new Clipboard('#copy', {
-            text: function() {
-                return clip;
-        }
-    });
+            text: function () {
+                return clip
+            }
+        });
     })
 
-    $('#config-generate').click(function() {
+    $('#config-generate').click(function () {
         var gen = '';
         for (var i = 0; i < params[0].length; i++) {
             if (params[0][i] == 'mac' || params[0][i] == 'ror_version'){
@@ -65,15 +65,16 @@ $(document).ready(function() {
         saveAs(blob, 'drcom.conf', true);
     });
     
-    $('#edit').click(function() {
+    $('#edit').click(function () {
         params[1][2] = $('#password').val();
+        $('.button-logo').text('done');
     });
     
-    $('#page_d').click(function() {
+    $('#page_d').click(function () {
         $('#panel').load('index.html' + ' #panel_d');
         $('#Version').html('Version D');
     });
-    $('#page_p').click(function() {
+    $('#page_p').click(function () {
         $('#panel').load('ver_p.html' + ' #panel_p');
         $('#Version').html('Version P');
     });
@@ -82,7 +83,7 @@ $(document).ready(function() {
 function fileupload (callback, accept) {
     var fileSelector = $('<input type="file">');
     if (accept) fileSelector.attr('accept', accept);
-    fileSelector.change(function() {
+    fileSelector.change(function () {
         var files = fileSelector[0].files;
         if (files.length) {
             callback(files[0]);
@@ -93,32 +94,30 @@ function fileupload (callback, accept) {
     fileSelector.click();
 }
 
-String.prototype.hexEncode = function() {
-    var hex, i;
-    var result = "";
-    for (i=0; i<this.length; i++) {
-        hex = this.charCodeAt(i).toString(16);
-        result += ("000"+hex).slice(-4);
-    }
-    return result
+function hexEncode(array) {
+    return array.map(function (byte) {
+        return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+    }).join('')
 }
 
-String.prototype.hex2a = function() {
+String.prototype.hex2a = function () {
     var str = '';
     for (var i = 0; i < this.length; i += 2)
         str += String.fromCharCode(parseInt(this.substr(i, 2), 16));
-    return str;
+    return str
 }
 
-String.prototype.hex2o = function() {
+String.prototype.hex2o = function () {
     var str = '';
     for (var i = 0; i < this.length; i += 2)
         str += (parseInt(this.substr(i, 2), 16) + '.');
-    return str;
+    return str
 }
 
 function re_d (text) {
-    text = text.hexEncode();
+    var int8array = new Uint8Array(text);
+    var textarray = Array.apply([], int8array);
+    text = hexEncode(textarray);
     var re1 = /f000f000[00-ff]{8}0[37]01/;
     var r1 = text.match(re1);
     var offset = text.indexOf(r1) + 16;
@@ -158,11 +157,13 @@ function re_d (text) {
     for (var i = params1.length - 1; i >= 0; i--) {
         document.getElementById(params1[i]).innerHTML = params2[i];
     };
-    return [params1, params2];
+    return [params1, params2]
 }
 
 function re_p (text) {
-    text = text.hexEncode();
+    var int8array = new Uint8Array(text);
+    var textarray = Array.apply([], int8array);
+    text = hexEncode(textarray);
     var re1 = /07[00-ff]{2}60000300/;
     var r1 = text.match(re1);
     var offset = text.indexOf(r1);
@@ -175,5 +176,5 @@ function re_p (text) {
     for (var i = params1.length - 1; i >= 0; i--) {
         document.getElementById(params1[i]).innerHTML = params2[i];
     };
-    return [params1,params2];
+    return [params1,params2]
 }
