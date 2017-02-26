@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import socket, struct, time
+
+import socket
+import struct
+import time
 from hashlib import md5
 import sys
 import os
@@ -366,8 +369,8 @@ def mkpkt(salt, usr, pwd, mac):
     return data
 
 def login(usr, pwd, svr):
-    import random
     global SALT
+    global AUTH_INFO
 
     i = 0
     while True:
@@ -382,6 +385,7 @@ def login(usr, pwd, svr):
         if address == (svr, 61440):
             if data[0] == '\x04':
                 log('[login] loged in')
+                AUTH_INFO = data[23:39]
                 break
             else:
                 log('[login] login failed.')
@@ -401,6 +405,22 @@ def login(usr, pwd, svr):
     #0.8 changed:
     return data[23:39]
     #return data[-22:-6]
+
+def logout(usr, pwd, svr, mac, auth_info):
+    salt = challenge(svr, time.time()+random.randint(0xF, 0xFF))
+    if salt:
+        data = '\x06\x01\x00' + chr(len(usr) + 20)
+        data += md5sum('\x03\x01' + salt + pwd)
+        data += usr.ljust(36, '\x00')
+        data += CONTROLCHECKSTATUS
+        data += ADAPTERNUM
+        data += dump(int(data[4:10].encode('hex'),16)^mac).rjust(6, '\x00')
+        data += '\x44\x72\x63\x6F' # Drco
+        data += auth_info
+        s.send(data)
+        data, address = s.recvfrom(1024)
+        if data[:1] == '\x04':
+            log('[logout_auth] logouted.')
 
 def keep_alive1(salt,tail,pwd,svr):
     foo = struct.pack('!H',int(time.time())%0xFFFF)
@@ -452,5 +472,6 @@ def main():
       empty_socket_buffer()
       keep_alive1(SALT,package_tail,password,server)
       keep_alive2(SALT,package_tail,password,server)
+
 if __name__ == "__main__":
     main()
