@@ -415,7 +415,7 @@ def logout(usr, pwd, svr, mac, auth_info):
         data += CONTROLCHECKSTATUS
         data += ADAPTERNUM
         data += dump(int(data[4:10].encode('hex'),16)^mac).rjust(6, '\x00')
-        data += '\x44\x72\x63\x6F' # Drco
+        # data += '\x44\x72\x63\x6F' # Drco
         data += auth_info
         s.send(data)
         data, address = s.recvfrom(1024)
