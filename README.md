@@ -80,6 +80,10 @@
 HITwh的Shindo酱的项目也是非常优秀，适用x版，请参考 <br>
 https://github.com/coverxit/EasyDrcom/
 
+**NTR君的dogcom**
+https://github.com/mchome/dogcom
+
+
 #### 其他哦莫西罗伊的版本
 PHP版: https://github.com/dantmnf/drcom-client
 
