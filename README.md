@@ -1,4 +1,5 @@
-# drcom-generic [![Join the chat at https://gitter.im/drcoms/drcom-generic](https://badges.gitter.im/drcoms/drcom-generic.svg)](https://gitter.im/drcoms/drcom-generic?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+# drcom-generic [![Join the chat at https://gitter.im/drcoms/drcom-generic](https://badges.gitter.im/drcoms/drcom-generic.svg)](https://gitter.im/drcoms/drcom-generic?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) <a href="https://t.me/dajiji"><img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" align="right" height="48" width="48" ></a>
 
 ## 注意
 
