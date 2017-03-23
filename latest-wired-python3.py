@@ -134,7 +134,7 @@ def challenge(svr,ran):
     return data[4:8]
 
 def keep_alive_package_builder(number,random,tail,type=1,first=False):
-    data = b'\x07'+ chr(number).encode() + b'\x28\x00\x0B' + chr(type).encode()
+    data = b'\x07'+ bytes([number]) + b'\x28\x00\x0B' + bytes([type])
     if first :
         data += b'\x0F\x27'
     else:
@@ -144,7 +144,7 @@ def keep_alive_package_builder(number,random,tail,type=1,first=False):
     data += b'\x00' * 4
     #data += struct.pack("!H",0xdc02)
     if type == 3:
-        foo = b''.join([chr(int(i)).encode() for i in host_ip.split('.')]) # host_ip
+        foo = b''.join([bytes([int(i)]) for i in host_ip.split('.')]) # host_ip
         #CRC
         # edited on 2014/5/12, filled zeros to checksum
         # crc = packet_CRC(data+foo)
@@ -184,7 +184,7 @@ def keep_alive2(*args):
         s.sendto(packet, (svr, 61440))
         data, address = s.recvfrom(1024)
         log('[keep-alive2] recv1', str(binascii.hexlify(data))[2:][:-1])
-        if data.startswith(b'\x07\x00\x28\x00') or data.startswith(b'\x07' + chr(svr_num).encode()  + b'\x28\x00'):
+        if data.startswith(b'\x07\x00\x28\x00') or data.startswith(b'\x07' + bytes([svr_num]) + b'\x28\x00'):
             break
         elif data[:1] == b'\x07' and data[2:3] == b'\x10':
             log('[keep-alive2] recv file, resending..')
@@ -282,7 +282,7 @@ def mkpkt(salt, usr, pwd, mac):
 	    unsigned char DogVersion;
 	};
     '''
-    data = b'\x03\x01\x00' + chr(len(usr) + 20).encode()
+    data = b'\x03\x01\x00' + bytes([len(usr) + 20])
     data += md5sum(b'\x03\x01' + salt + pwd.encode())
     data += (usr.encode() + 36*b'\x00')[:36]
     data += CONTROLCHECKSTATUS
@@ -290,7 +290,7 @@ def mkpkt(salt, usr, pwd, mac):
     data += dump(int(binascii.hexlify(data[4:10]), 16)^mac)[-6:] #mac xor md51
     data += md5sum(b'\x01' + pwd.encode() + salt + b'\x00'*4) #md52
     data += b'\x01' # number of ip
-    data += b''.join([chr(int(i)).encode() for i in host_ip.split('.')]) #x.x.x.x ->
+    data += b''.join([bytes([int(i)]) for i in host_ip.split('.')]) #x.x.x.x ->
     data += b'\00' * 4 #your ipaddress 2
     data += b'\00' * 4 #your ipaddress 3
     data += b'\00' * 4 #your ipaddress 4
@@ -319,8 +319,8 @@ def mkpkt(salt, usr, pwd, mac):
 	};
     '''
     data += (host_name.encode() + 32 * b'\x00')[:32] # _tagHostInfo.HostName
-    data += b''.join([chr(int(i)).encode() for i in PRIMARY_DNS.split('.')]) # _tagHostInfo.DNSIP1
-    data += b''.join([chr(int(i)).encode() for i in dhcp_server.split('.')]) # _tagHostInfo.DHCPServerIP
+    data += b''.join([bytes([int(i)]) for i in PRIMARY_DNS.split('.')]) # _tagHostInfo.DNSIP1
+    data += b''.join([bytes([int(i)]) for i in dhcp_server.split('.')]) # _tagHostInfo.DHCPServerIP
     data += b'\x00\x00\x00\x00' # _tagHostInfo.DNSIP2
     data += b'\x00' * 4 # _tagHostInfo.WINSIP1
     data += b'\x00' * 4 # _tagHostInfo.WINSIP2
@@ -345,7 +345,7 @@ def mkpkt(salt, usr, pwd, mac):
 	};
         '''
         data += b'\x00' # _tagLDAPAuth.Code
-        data += chr(len(pwd)) # _tagLDAPAuth.PasswordLen
+        data += bytes([len(pwd)]) # _tagLDAPAuth.PasswordLen
         data += ror(md5sum(b'\x03\x01' + salt + pwd), pwd) # _tagLDAPAuth.Password
     '''
 	struct  _tagDrcomAuthExtData
@@ -412,7 +412,7 @@ def login(usr, pwd, svr):
 def logout(usr, pwd, svr, mac, auth_info):
     salt = challenge(svr, time.time()+random.randint(0xF, 0xFF))
     if salt:
-        data = b'\x06\x01\x00' + chr(len(usr) + 20).encode()
+        data = b'\x06\x01\x00' + bytes([len(usr) + 20])
         data += md5sum(b'\x03\x01' + salt + pwd.encode())
         data += (usr + 36*'\x00')[:36]
         data += CONTROLCHECKSTATUS
