@@ -1,5 +1,5 @@
 #coding=UTF-8
-#test version 
+#test version
 
 
 import socket, struct, time,random,re
@@ -16,10 +16,10 @@ IPDOG = '\x01'
 host_name = 'DRCOMFUCKER'
 PRIMARY_DNS = '202.96.128.166'
 dhcp_server = '222.202.171.33'
-AUTH_VERSION = '\x22\x00'
+AUTH_VERSION = '\x7f\x7f'   #maximize version for continuous update
 mac = 0xfc15b4ff0125
 host_os = 'Linux'
-KEEP_ALIVE_VERSION = '\x0f\x27'
+KEEP_ALIVE_VERSION = '\xdc\x02'
 
 #config_end
 
@@ -30,39 +30,39 @@ class ChallengeException (Exception):
 class loginException (Exception):
   def __init__(self):
     pass
-	
+
 def try_socket():
 #sometimes cannot get the port
-	global s,salt
-	try:
-		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		s.bind(("0.0.0.0", 61440))
-		s.settimeout(3)
-	except:
-		print ("."),
-		time.sleep(0.5)
-		print ("."),
-		time.sleep(0.5)
-		print (".")
-		time.sleep(0.5)
-		print ("...reopen")
-		time.sleep(10)
-		main()
-	else:
-		SALT= ''
+    global s,salt
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.bind(("0.0.0.0", 61440))
+        s.settimeout(3)
+    except:
+        print ("."),
+        time.sleep(0.5)
+        print ("."),
+        time.sleep(0.5)
+        print (".")
+        time.sleep(0.5)
+        print ("...reopen")
+        time.sleep(10)
+        main()
+    else:
+        SALT= ''
 
 UNLIMITED_RETRY = True
 EXCEPTION = False
-	
+
 def get_randmac():
-	mac = [ 0x00, 0x16, 0x3e,random.randint(0x00, 0x7f),random.randint(0x00, 0xff),random.randint(0x00, 0xff) ]
-	return ''.join(map(lambda x: "%02x" % x, mac))
-	#print randomMAC()
-	
+    mac = [ 0x00, 0x16, 0x3e,random.randint(0x00, 0x7f),random.randint(0x00, 0xff),random.randint(0x00, 0xff) ]
+    return ''.join(map(lambda x: "%02x" % x, mac))
+    #print randomMAC()
+
 def version():
-	print ("DrCOM Auth Router for GDUFE") 
-	
-	
+    print ("DrCOM Auth Router for GDUFE")
+
+
 def challenge(svr,ran):
     while True:
       t = struct.pack("<H", int(ran)%(0xFFFF))
@@ -73,7 +73,7 @@ def challenge(svr,ran):
       except:
         print('[challenge] timeout, retrying...')
         continue
-        
+
       if address == (svr, 61440):
         break
       else:
@@ -110,7 +110,7 @@ def keep_alive_package_builder(number,random,tail,type=1,first=False):
     #data += struct.pack("!H",0xdc02)
     if type == 3:
       foo = ''.join([chr(int(i)) for i in host_ip.split('.')]) # host_ip
-	#use double keep in main to keep online .Ice
+    #use double keep in main to keep online .Ice
       crc = '\x00' * 4
       #data += struct.pack("!I",crc) + foo + '\x00' * 8
       data += crc + foo + '\x00' * 8
@@ -133,8 +133,8 @@ def keep_alive2(*args):
     packet = ''
     svr = server
     ran = random.randint(0,0xFFFF)
-    ran += random.randint(1,10)   
-    
+    ran += random.randint(1,10)
+
     packet = keep_alive_package_builder(0,dump(ran),'\x00'*4,1,True)
     #packet = keep_alive_package_builder(0,dump(ran),dump(ran)+'\x22\x06',1,True)
     print ('[keep-alive2] send1')#packet.encode('hex')
@@ -144,9 +144,9 @@ def keep_alive2(*args):
         if data.startswith('\x07'):
             break
         else:
-			print ('[keep-alive2] recv/unexpected',data.encode('hex'))
-			continue
-    ran += random.randint(1,10)   
+            print ('[keep-alive2] recv/unexpected',data.encode('hex'))
+            continue
+    ran += random.randint(1,10)
     packet = keep_alive_package_builder(1,dump(ran),'\x00'*4,1,False)
     #print '[keep-alive2] send2',packet.encode('hex')
     s.sendto(packet, (svr, 61440))
@@ -156,9 +156,9 @@ def keep_alive2(*args):
             break
     #print '[keep-alive2] recv2',data.encode('hex')
     tail = data[16:20]
-    
 
-    ran += random.randint(1,10)   
+
+    ran += random.randint(1,10)
     packet = keep_alive_package_builder(2,dump(ran),tail,3,False)
     #print '[keep-alive2] send3',packet.encode('hex')
     s.sendto(packet, (svr, 61440))
@@ -173,29 +173,29 @@ def keep_alive2(*args):
 
     while True:
       try:
-		keep_alive1(SALT,package_tail,password,server)
-		print '[keep-alive2] send'
-		ran += random.randint(1,10)   
-		packet = keep_alive_package_builder(i,dump(ran),tail,1,False)
-		#print('DEBUG: keep_alive2,packet 4\n',packet.encode('hex'))
-		#print '[keep_alive2] send',str(i),packet.encode('hex')
-		s.sendto(packet, (svr, 61440))
-		data, address = s.recvfrom(1024)
-		#print '[keep_alive2] recv',data.encode('hex')
-		tail = data[16:20]
-		#print('DEBUG: keep_alive2,packet 4 return\n',data.encode('hex'))
-        
-		ran += random.randint(1,10)   
-		packet = keep_alive_package_builder(i+1,dump(ran),tail,3,False)
-		#print('DEBUG: keep_alive2,packet 5\n',packet.encode('hex'))
-		s.sendto(packet, (svr, 61440))
-		#print('[keep_alive2] send',str(i+1),packet.encode('hex'))
-		data, address = s.recvfrom(1024)
-		#print('[keep_alive2] recv',data.encode('hex'))
-		tail = data[16:20]
-		#print('DEBUG: keep_alive2,packet 5 return\n',data.encode('hex'))
-		i = (i+2) % 0xFF
-		time.sleep(20)
+        keep_alive1(SALT,package_tail,password,server)
+        print '[keep-alive2] send'
+        ran += random.randint(1,10)
+        packet = keep_alive_package_builder(i,dump(ran),tail,1,False)
+        #print('DEBUG: keep_alive2,packet 4\n',packet.encode('hex'))
+        #print '[keep_alive2] send',str(i),packet.encode('hex')
+        s.sendto(packet, (svr, 61440))
+        data, address = s.recvfrom(1024)
+        #print '[keep_alive2] recv',data.encode('hex')
+        tail = data[16:20]
+        #print('DEBUG: keep_alive2,packet 4 return\n',data.encode('hex'))
+
+        ran += random.randint(1,10)
+        packet = keep_alive_package_builder(i+1,dump(ran),tail,3,False)
+        #print('DEBUG: keep_alive2,packet 5\n',packet.encode('hex'))
+        s.sendto(packet, (svr, 61440))
+        #print('[keep_alive2] send',str(i+1),packet.encode('hex'))
+        data, address = s.recvfrom(1024)
+        #print('[keep_alive2] recv',data.encode('hex'))
+        tail = data[16:20]
+        #print('DEBUG: keep_alive2,packet 5 return\n',data.encode('hex'))
+        i = (i+2) % 0xFF
+        time.sleep(20)
       except:
         pass
 
@@ -216,7 +216,7 @@ def mkpkt(salt, usr, pwd, mac):
     data += dump(int(data[4:10].encode('hex'),16)^mac).rjust(6,'\x00') #mac xor md51
     data += md5sum("\x01" + pwd + salt + '\x00'*4) #md52
     data += '\x01' #NIC count
-    data += hexip #your ip address1 
+    data += hexip #your ip address1
     data += '\00'*4 #your ipaddress 2
     data += '\00'*4 #your ipaddress 3
     data += '\00'*4 #your ipaddress 4
@@ -246,13 +246,13 @@ def mkpkt(salt, usr, pwd, mac):
     data += '\x00' # auto logout / default: False
     data += '\x00' # broadcast mode / default : False
     data += '\xc2\x66' #unknown
-    
-    
+
+
     return data
 
 def login(usr, pwd, svr):
     global SALT
- 
+
     i = 0
     while True:
         salt = challenge(svr,time.time()+random.randint(0xF,0xFF))
@@ -275,7 +275,7 @@ def login(usr, pwd, svr):
               sys.exit(1)
             else:
               continue
-            
+
     print('[login] login Success')
     return data[23:39]
     #return data[-22:-6]
@@ -312,38 +312,38 @@ def empty_socket_buffer():
     print('emptyed')
 
 
-		
-def main():
-	global server,username,password,host_name,host_os,dhcp_server,mac,hexip,host_ip
-	hexip=socket.inet_aton(host_ip)
-	#host_ip=ip
-	host_name = "est-pc"
-	host_os = "8089D"   #default is 8089D
-	dhcp_server = "0.0.0.0"
-	#mac = 0xE0DB55BAE012 
-	#it is a mac in programme and it may crush with other users so I use randMAC to avoid it
-	loginpart()
-	
-def loginpart():
-	global package_tail
-	while True:
-		try:
-			package_tail = login(username, password, server)
-		except loginException:
-			continue
-		#print('package_tail',package_tail.encode('hex'))
-		keeppart()
-		
-def keeppart():
-	#empty_socket_buffer()
-	#empty_socket_buffer()
-	keep_alive2(SALT,package_tail,password,server)
 
-		
+def main():
+    global server,username,password,host_name,host_os,dhcp_server,mac,hexip,host_ip
+    hexip=socket.inet_aton(host_ip)
+    #host_ip=ip
+    host_name = "est-pc"
+    host_os = "8089D"   #default is 8089D
+    dhcp_server = "0.0.0.0"
+    #mac = 0xE0DB55BAE012
+    #it is a mac in programme and it may crush with other users so I use randMAC to avoid it
+    loginpart()
+
+def loginpart():
+    global package_tail
+    while True:
+        try:
+            package_tail = login(username, password, server)
+        except loginException:
+            continue
+        #print('package_tail',package_tail.encode('hex'))
+        keeppart()
+
+def keeppart():
+    #empty_socket_buffer()
+    #empty_socket_buffer()
+    keep_alive2(SALT,package_tail,password,server)
+
+
 if __name__ == "__main__":
-	try_socket()
-	version()
-	#get_conf()
-	main()
+    try_socket()
+    version()
+    #get_conf()
+    main()
 
 
