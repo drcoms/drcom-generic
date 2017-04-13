@@ -59,7 +59,7 @@
 
 建议有问题先读wiki，再发issue
 
-* 在线配置器 http://drcoms.github.io/drcom-generic/ by NTR君 (Firefox有秘制bug，请用Chrome或IE)
+* 在线配置器 http://drcoms.github.io/drcom-generic/ by NTR君 (文件大小不能大于512k)
 * 相关工具和验证用的代码在 *utils* 目录下
 * 测试数据在 *tests* 目录下
 * 某些学校的版本请在 *custom* 目录中寻找
