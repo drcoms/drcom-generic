@@ -248,7 +248,7 @@ def keep_alive2(*args):
             #log('DEBUG: keep_alive2,packet 5 return\n',data.encode('hex'))
             i = (i+2) % 0xFF
         except:
-            pass
+            break
 
 def checksum(s):
     ret = 1234
