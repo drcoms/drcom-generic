@@ -248,7 +248,8 @@ def keep_alive2(*args):
             #log('DEBUG: keep_alive2,packet 5 return\n',data.encode('hex'))
             i = (i+2) % 0xFF
         except:
-            break
+            log('[keep_alive2] error', 'raise Exception to main()')
+            raise
 
 def checksum(s):
     ret = 1234
@@ -431,11 +432,15 @@ def keep_alive1(salt,tail,pwd,svr):
 
     s.sendto(data, (svr, 61440))
     while True:
-        data, address = s.recvfrom(1024)
-        if data[0] == '\x07':
-            break
-        else:
-            log('[keep-alive1]recv/not expected',data.encode('hex'))
+        try:
+            data, address = s.recvfrom(1024)
+            if data[0] == '\x07':
+                break
+            else:
+                log('[keep-alive1]recv/not expected',data.encode('hex'))
+        except:
+            log('[keep_alive1] error', 'raise Exception to main() or keep_alive2()')
+            raise
     log('[keep-alive1] recv',data.encode('hex'))
 
 def empty_socket_buffer():
@@ -470,8 +475,12 @@ def main():
       log('package_tail',package_tail.encode('hex'))
       #keep_alive1 is fucking bullshit!
       empty_socket_buffer()
-      keep_alive1(SALT,package_tail,password,server)
-      keep_alive2(SALT,package_tail,password,server)
+      try:
+          keep_alive1(SALT,package_tail,password,server)
+          keep_alive2(SALT,package_tail,password,server)
+      except:
+          log('[main] error', 'something was wrong in keep_alives, do everything again')
+          continue
 
 if __name__ == "__main__":
     main()
