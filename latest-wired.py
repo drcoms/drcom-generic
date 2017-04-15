@@ -468,19 +468,22 @@ def main():
     log("auth svr: " + server + "\nusername: " + username + "\npassword: " + password + "\nmac: " + str(hex(mac))[:-1])
     log("bind ip: " + bind_ip)
     while True:
-      try:
-        package_tail = login(username, password, server)
-      except LoginException:
-        continue
-      log('package_tail',package_tail.encode('hex'))
-      #keep_alive1 is fucking bullshit!
-      empty_socket_buffer()
-      try:
-          keep_alive1(SALT,package_tail,password,server)
-          keep_alive2(SALT,package_tail,password,server)
-      except:
-          log('[main] error', 'something was wrong in keep_alives, do everything again')
-          continue
+        try:
+            package_tail = login(username, password, server)
+        except LoginException:
+            continue
+        log('package_tail',package_tail.encode('hex'))
+        #keep_alive1 is fucking bullshit!
+        empty_socket_buffer()
+        try:
+            keep_alive1(SALT,package_tail,password,server)
+            keep_alive2(SALT,package_tail,password,server)
+        except:
+            log('[main] error', 'something was wrong in keep_alives, do everything again')
+            time.sleep(3)
+            #empty socket buffer before relogin
+            empty_socket_buffer()
+            continue
 
 if __name__ == "__main__":
     main()
