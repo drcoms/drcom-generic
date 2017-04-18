@@ -1,5 +1,5 @@
-#dr.com 5.20d for cust/genenal_d
-##test v1.3.7
+# dr.com 5.20d for cust/genenal_d
+## test v1.3.7
 ### 作者 qoddi hnczp@icloud.com
 这是一个MOD的版本，也就是参考了以下 Latyas latyas@gmail.com 的两部分共同完成的一个版本
 
