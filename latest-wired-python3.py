@@ -249,7 +249,7 @@ def keep_alive2(*args):
             log('[keep_alive2] recv', str(binascii.hexlify(data))[2:][:-1])
             tail = data[16:20]
             #log('DEBUG: keep_alive2,packet 5 return\n', str(binascii.hexlify(data))[2:][:-1])
-            i = (i+2) % 0xFF
+            i = (i+2) % 127 #must less than 128 ,else the keep_alive2() couldn't receive anything.
         except:
             pass
 
