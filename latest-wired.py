@@ -478,7 +478,8 @@ def main():
         try:
             keep_alive1(SALT,package_tail,password,server)
             keep_alive2(SALT,package_tail,password,server)
-        except:
+        except Exception as e:
+            print(e)
             log('[main] error', 'something was wrong in keep_alives, do everything again')
             time.sleep(3)
             #empty socket buffer before relogin
