@@ -385,6 +385,25 @@ def login(usr, pwd, svr):
         try:
             data, address = s.recvfrom(1024)
             log('[login] recv',data.encode('hex'))
+            if address == (svr, 61440) :
+                if data[0] == '\x04':
+                    log('[login] loged in')
+                    AUTH_INFO = data[23:39]
+                    break
+                else:
+                    log('[login] login failed.')
+                    if IS_TEST:
+                        time.sleep(3)
+                    else:
+                        time.sleep(30)
+                    continue
+            else:
+                if i >= 5 and UNLIMITED_RETRY == False :
+                    log('[login] exception occured.')
+                    sys.exit(1)
+                else:
+                    i += 1
+                    continue
         except socket.timeout as e:
             print(e)
             log('[login] recv timeout.')
@@ -392,24 +411,7 @@ def login(usr, pwd, svr):
             if timeoutcount >= 5:
                 log('[login] recv timeout exception occured 5 times.')
                 sys.exit(1)
-        if address == (svr, 61440) :
-            if data[0] == '\x04':
-                log('[login] loged in')
-                AUTH_INFO = data[23:39]
-                break
             else:
-                log('[login] login failed.')
-                if IS_TEST:
-                    time.sleep(3)
-                else:
-                    time.sleep(30)
-                continue
-        else:
-            if i >= 5 and UNLIMITED_RETRY == False :
-                log('[login] exception occured.')
-                sys.exit(1)
-            else:
-                i += 1
                 continue
 
     log('[login] login sent')
