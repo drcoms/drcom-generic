@@ -374,16 +374,25 @@ def login(usr, pwd, svr):
     global AUTH_INFO
 
     i = 0
+    timeoutcount = 0
     while True:
         salt = challenge(svr,time.time()+random.randint(0xF,0xFF))
         SALT = salt
         packet = mkpkt(salt, usr, pwd, mac)
         log('[login] send',packet.encode('hex'))
         s.sendto(packet, (svr, 61440))
-        data, address = s.recvfrom(1024)
-        log('[login] recv',data.encode('hex'))
         log('[login] packet sent.')
-        if address == (svr, 61440):
+        try:
+            data, address = s.recvfrom(1024)
+        except socket.timeout as e:
+            print(e)
+            log('[login] recv timeout.')
+            timeoutcount += 1
+            if timeoutcount >= 5:
+                log('[login] recv timeout exception occured 5 times.')
+                sys.exit(1)
+        log('[login] recv',data.encode('hex'))
+        if address == (svr, 61440) :
             if data[0] == '\x04':
                 log('[login] loged in')
                 AUTH_INFO = data[23:39]
@@ -400,6 +409,7 @@ def login(usr, pwd, svr):
                 log('[login] exception occured.')
                 sys.exit(1)
             else:
+                i += 1
                 continue
 
     log('[login] login sent')
