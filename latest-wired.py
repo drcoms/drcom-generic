@@ -384,6 +384,7 @@ def login(usr, pwd, svr):
         log('[login] packet sent.')
         try:
             data, address = s.recvfrom(1024)
+            log('[login] recv',data.encode('hex'))
         except socket.timeout as e:
             print(e)
             log('[login] recv timeout.')
@@ -391,7 +392,6 @@ def login(usr, pwd, svr):
             if timeoutcount >= 5:
                 log('[login] recv timeout exception occured 5 times.')
                 sys.exit(1)
-        log('[login] recv',data.encode('hex'))
         if address == (svr, 61440) :
             if data[0] == '\x04':
                 log('[login] loged in')
