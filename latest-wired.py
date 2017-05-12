@@ -8,6 +8,7 @@ from hashlib import md5
 import sys
 import os
 import random
+import traceback
 
 # CONFIG
 server = "192.168.100.150"
@@ -493,6 +494,7 @@ def main():
         except Exception as e:
             print(e)
             log('[main] error', 'something was wrong in keep_alives, do everything again')
+            log(traceback.format_exc())
             time.sleep(3)
             #empty socket buffer before relogin
             empty_socket_buffer()
