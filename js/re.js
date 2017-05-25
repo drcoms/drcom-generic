@@ -116,7 +116,7 @@ String.prototype.hex2o = function () {
 
 function re_d (text) {
     var int8array = new Uint8Array(text);
-    var textarray = Array.apply([], int8array);
+    var textarray = Array.from(int8array);
     text = hexEncode(textarray);
     var re1 = /f000f000[00-ff]{8}0[37]01/;
     var r1 = text.match(re1);
