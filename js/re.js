@@ -162,7 +162,7 @@ function re_d (text) {
 
 function re_p (text) {
     var int8array = new Uint8Array(text);
-    var textarray = Array.apply([], int8array);
+    var textarray = Array.from(int8array);
     text = hexEncode(textarray);
     var re1 = /07[00-ff]{2}60000300/;
     var r1 = text.match(re1);
