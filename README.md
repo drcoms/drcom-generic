@@ -6,6 +6,8 @@
 本项目会随着 *DrCOM* 客户端更新而跟进，建议您直接 *Watch* 而不要 *fork*，除非您想提交代码，不然 *fork* 毫无意义。请可以折腾 *DrCOM* 的同学，请发邮件到 latyas@gmail.com, 让我把您加入开发者。
 
 ## 发起Issue（提问的要求）
+[提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md)
+
 如果你不能登录，请发Issue的时候附上用哪个脚本文件，脚本的日志输出，正常客户端的抓包，并且附上你的学校的名称，最好可以提供相关的Windows和Linux下的客户端，提高沟通效率。
 
 所有的 Issue 在 15 天内没有**任何更新的**或者**已经解决**的将做关闭处理，除非再提供更有帮助于解决问题的资料，否则Issue不会Reopen，并且同一个人同样的Issue请不要重复提交。
