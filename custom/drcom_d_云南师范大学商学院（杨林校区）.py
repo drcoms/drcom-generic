@@ -10,21 +10,21 @@ import os
 import random
 
 # CONFIG
-server = '172.26.0.2'
-username='151xxxxx'
-password='123456'
+server             = '172.26.0.2'
+username           = '151xxxxx'
+password           = '123456'
 CONTROLCHECKSTATUS = '\x20'
-ADAPTERNUM = '\x04'
-host_ip = '172.25.32.249'
-IPDOG = '\x01'
-host_name = 'GILIGILIEYE'
-PRIMARY_DNS = '172.26.2.8'
-dhcp_server = '172.26.2.8'
-AUTH_VERSION = '\x1f\x00'
-mac = 0xaabbccddeeff
-host_os = 'Windows NT 10.0'
+ADAPTERNUM         = '\x04'
+host_ip            = '172.25.32.249'
+IPDOG              = '\x01'
+host_name          = 'GILIGILIEYE'
+PRIMARY_DNS        = '172.26.2.8'
+dhcp_server        = '172.26.2.8'
+AUTH_VERSION       = '\x1f\x00'
+mac                = 0xaabbccddeeff
+host_os            = 'Windows NT 10.0'
 KEEP_ALIVE_VERSION = '\xdc\x02'
-ror_version = False
+ror_version        = False
 # CONFIG_END
 
 nic_name = '' #Indicate your nic, e.g. 'eth0.2'.nic_name
@@ -256,24 +256,24 @@ def checksum(s):
 
 def mkpkt(salt, usr, pwd, mac):
     '''
-	struct  _tagLoginPacket
-	{
-	    struct _tagDrCOMHeader Header;
-	    unsigned char PasswordMd5[MD5_LEN];
-	    char Account[ACCOUNT_MAX_LEN];
-	    unsigned char ControlCheckStatus;
-	    unsigned char AdapterNum;
-	    unsigned char MacAddrXORPasswordMD5[MAC_LEN];
-	    unsigned char PasswordMd5_2[MD5_LEN];
-	    unsigned char HostIpNum;
-	    unsigned int HostIPList[HOST_MAX_IP_NUM];
-	    unsigned char HalfMD5[8];
-	    unsigned char DogFlag;
-	    unsigned int unkown2;
-	    struct _tagHostInfo HostInfo;
-	    unsigned char ClientVerInfoAndInternetMode;
-	    unsigned char DogVersion;
-	};
+    struct  _tagLoginPacket
+    {
+        struct _tagDrCOMHeader Header;
+        unsigned char PasswordMd5[MD5_LEN];
+        char Account[ACCOUNT_MAX_LEN];
+        unsigned char ControlCheckStatus;
+        unsigned char AdapterNum;
+        unsigned char MacAddrXORPasswordMD5[MAC_LEN];
+        unsigned char PasswordMd5_2[MD5_LEN];
+        unsigned char HostIpNum;
+        unsigned int HostIPList[HOST_MAX_IP_NUM];
+        unsigned char HalfMD5[8];
+        unsigned char DogFlag;
+        unsigned int unkown2;
+        struct _tagHostInfo HostInfo;
+        unsigned char ClientVerInfoAndInternetMode;
+        unsigned char DogVersion;
+    };
     '''
     data = '\x03\x01\x00' + chr(len(usr) + 20)
     data += md5sum('\x03\x01' + salt + pwd)
@@ -291,25 +291,25 @@ def mkpkt(salt, usr, pwd, mac):
     data += IPDOG
     data += '\x00'*4 # unknown2
     '''
-	struct  _tagOSVERSIONINFO
-	{
-	    unsigned int OSVersionInfoSize;
-	    unsigned int MajorVersion;
-	    unsigned int MinorVersion;
-	    unsigned int BuildNumber;
-	    unsigned int PlatformID;
-	    char ServicePack[128];
-	};
-	struct  _tagHostInfo
-	{
-	    char HostName[HOST_NAME_MAX_LEN];
-	    unsigned int DNSIP1;
-	    unsigned int DHCPServerIP;
-	    unsigned int DNSIP2;
-	    unsigned int WINSIP1;
-	    unsigned int WINSIP2;
-	    struct _tagDrCOM_OSVERSIONINFO OSVersion;
-	};
+    struct  _tagOSVERSIONINFO
+    {
+        unsigned int OSVersionInfoSize;
+        unsigned int MajorVersion;
+        unsigned int MinorVersion;
+        unsigned int BuildNumber;
+        unsigned int PlatformID;
+        char ServicePack[128];
+    };
+    struct  _tagHostInfo
+    {
+        char HostName[HOST_NAME_MAX_LEN];
+        unsigned int DNSIP1;
+        unsigned int DHCPServerIP;
+        unsigned int DNSIP2;
+        unsigned int WINSIP1;
+        unsigned int WINSIP2;
+        struct _tagDrCOM_OSVERSIONINFO OSVersion;
+    };
     '''
     data += host_name.ljust(32, '\x00') # _tagHostInfo.HostName
     data += ''.join([chr(int(i)) for i in PRIMARY_DNS.split('.')]) # _tagHostInfo.DNSIP1
@@ -330,25 +330,25 @@ def mkpkt(salt, usr, pwd, mac):
     data += AUTH_VERSION
     if ror_version:
         '''
-	struct  _tagLDAPAuth
-	{
-	    unsigned char Code;
-	    unsigned char PasswordLen;
-	    unsigned char Password[MD5_LEN];
-	};
+    struct  _tagLDAPAuth
+    {
+        unsigned char Code;
+        unsigned char PasswordLen;
+        unsigned char Password[MD5_LEN];
+    };
         '''
         data += '\x00' # _tagLDAPAuth.Code
         data += chr(len(pwd)) # _tagLDAPAuth.PasswordLen
         data += ror(md5sum('\x03\x01' + salt + pwd), pwd) # _tagLDAPAuth.Password
     '''
-	struct  _tagDrcomAuthExtData
-	{
-	    unsigned char Code;
-	    unsigned char Len;
-	    unsigned long CRC;
-	    unsigned short Option;
-	    unsigned char AdapterAddress[MAC_LEN];
-	};
+    struct  _tagDrcomAuthExtData
+    {
+        unsigned char Code;
+        unsigned char Len;
+        unsigned long CRC;
+        unsigned short Option;
+        unsigned char AdapterAddress[MAC_LEN];
+    };
     '''
     data += '\x02' # _tagDrcomAuthExtData.Code
     data += '\x0C' # _tagDrcomAuthExtData.Len
@@ -369,30 +369,42 @@ def login(usr, pwd, svr):
     global AUTH_INFO
 
     i = 0
+    timeoutcount = 0
     while True:
         salt = challenge(svr,time.time()+random.randint(0xF,0xFF))
         SALT = salt
         packet = mkpkt(salt, usr, pwd, mac)
         log('[login] send',packet.encode('hex'))
         s.sendto(packet, (svr, 61440))
-        data, address = s.recvfrom(1024)
-        log('[login] recv',data.encode('hex'))
         log('[login] packet sent.')
-        if address == (svr, 61440):
-            if data[0] == '\x04':
-                log('[login] loged in')
-                AUTH_INFO = data[23:39]
-                break
-            else:
-                log('[login] login failed.')
-                if IS_TEST:
-                    time.sleep(3)
+        try:
+            data, address = s.recvfrom(1024)
+            log('[login] recv',data.encode('hex'))
+            if address == (svr, 61440) :
+                if data[0] == '\x04':
+                    log('[login] loged in')
+                    AUTH_INFO = data[23:39]
+                    break
                 else:
-                    time.sleep(30)
-                continue
-        else:
-            if i >= 5 and UNLIMITED_RETRY == False :
-                log('[login] exception occured.')
+                    log('[login] login failed.')
+                    if IS_TEST:
+                        time.sleep(3)
+                    else:
+                        time.sleep(30)
+                    continue
+            else:
+                if i >= 5 and UNLIMITED_RETRY == False :
+                    log('[login] exception occured.')
+                    sys.exit(1)
+                else:
+                    i += 1
+                    continue
+        except socket.timeout as e:
+            print(e)
+            log('[login] recv timeout.')
+            timeoutcount += 1
+            if timeoutcount >= 5:
+                log('[login] recv timeout exception occured 5 times.')
                 sys.exit(1)
             else:
                 continue
@@ -473,8 +485,10 @@ def main():
         try:
             keep_alive1(SALT,package_tail,password,server)
             keep_alive2(SALT,package_tail,password,server)
-        except:
+        except Exception as e:
+            print(e)
             log('[main] error', 'something was wrong in keep_alives, do everything again')
+            log(traceback.format_exc())
             time.sleep(3)
             #empty socket buffer before relogin
             empty_socket_buffer()
