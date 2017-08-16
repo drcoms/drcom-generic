@@ -10,17 +10,17 @@ import os
 import random
 
 # CONFIG
-server             = '172.26.0.2'
+server             = '192.168.0.2'
 username           = '151xxxxx'
 password           = '123456'
 CONTROLCHECKSTATUS = '\x20'
-ADAPTERNUM         = '\x04'
-host_ip            = '172.25.32.249'
+ADAPTERNUM         = '\x03'
+host_ip            = '172.19.5.249'
 IPDOG              = '\x01'
 host_name          = 'GILIGILIEYE'
-PRIMARY_DNS        = '172.26.2.8'
-dhcp_server        = '172.26.2.8'
-AUTH_VERSION       = '\x1f\x00'
+PRIMARY_DNS        = '192.168.1.2'
+dhcp_server        = '192.168.1.2'
+AUTH_VERSION       = '\x2e\x00'
 mac                = 0xaabbccddeeff
 host_os            = 'Windows NT 10.0'
 KEEP_ALIVE_VERSION = '\xdc\x02'
