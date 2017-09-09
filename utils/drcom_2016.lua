@@ -10,8 +10,8 @@ do --do...end是Lua语言的语句块关键字
 	local pf = p_drcom.fields
 
 	pf.f1_1dir =    ProtoField.uint8("drcom.times","Times of Dial",base.DEC)
-	pf.f1_unkonw01 =    ProtoField.bytes("drcom.unkonwn","unkonwn01",base.HEX)
-	pf.f1_unkonw02 =    ProtoField.bytes("drcom.fixed","Fixed ver? ",base.HEX)
+	pf.f1_unkonw01 =    ProtoField.bytes("drcom.unkonwn","unkonwn01",base.NONE)
+	pf.f1_unkonw02 =    ProtoField.bytes("drcom.fixed","Fixed ver? ",base.NONE)
 	pf.f2_1dir =    ProtoField.bytes("drcom.challenge","Challenge")
 
 	local t_code = {[0x01]="Start Request",
