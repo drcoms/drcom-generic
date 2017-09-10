@@ -1,157 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Auto Configure</title>
-    <!-- CSS -->
-    <link rel="stylesheet" type="text/css" href="css/materialize.min.css" media="screen,projection">
-    <link rel="stylesheet" type="text/css" href="css/style.css" media="screen,projection">
-    <link rel="shortcut icon" href="favicon.ico">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Auto Configure</title>
+  <link rel="shortcut icon" href="static/favicon.ico">
+  <link rel="stylesheet" href="static/libs/material.min.css">
+  <link rel="stylesheet" href="static/libs/getmdl-select.min.css">
 </head>
+
 <body>
-    <!-- Javascript -->
-    <script type="text/javascript" src="js/jquery.min.js"></script>
-    <script type="text/javascript" src="js/materialize.min.js"></script>
-    <script type="text/javascript" src="js/FileSaver.min.js"></script>
-    <script type="text/javascript" src="js/clipboard.min.js"></script>
-    <script type="text/javascript" src="js/re.js"></script>
+  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header mdl-color--grey-100">
+    <header class="mdl-layout__header">
+      <div class="mdl-layout__header-row" style="cursor: pointer;">
+        <h3 id="title">Auto Configure</h3>
+      </div>
+      <div class="mdl-tooltip" data-mdl-for="title">
+          Powered by Project D(rcom).
+      </div>
+    </header>
 
-    <nav class="light-blue lighten-1">
-        <div class="nav-wrapper container">
-            <!-- brand logo -->
-            <a href="#" id="logo-container" class="brand-logo">Auto Configure</a>
-            <!-- dropdown content -->
-            <ul id="version_select" class="dropdown-content">
-                <li><a href="#" id="page_d">Version D</a></li>
-                <li><a href="#" id="page_p">Version P</a></li>
-            </ul>
-            <ul class="right hide-on-med-and-down">
-                <li><a href="#" id="file-upload">Upload</a></li>
-                <li><a href="#" id="config-generate">Generate</a></li>
-                <li><a class="waves-effect waves-light modal-trigger" href="#clipboard">Clipboard</a></li>
-                <li><a id="Version" class="dropdown-button" href="#" data-activates="version_select">Version D<i class="material-icons right">arrow_drop_down</i></a></li>
-            </ul>
-            <ul id="nav-mobile" class="side-nav">
-                <li><a href="#" id="file-upload">Upload</a></li>
-                <li><a href="#" id="config-generate">Generate</a></li>
-                <li><a class="waves-effect waves-light modal-trigger" href="#clipboard">Clipboard</a></li>
-                <li><a href="index.html">Version D</a></li>
-                <li><a href="ver_p.html">Version P</a></li>
-            </ul>
-            <a href="#" data-activates="nav-mobile" class="button-collapse">
-                <i class="material-icons">menu</i>
-            </a>
+    <main id="app" class="mdl-layout__content">
+      <div class="container mdl-shadow--2dp">
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label getmdl-select" style="margin-left: 3rem;">
+          <input class="mdl-textfield__input" :value='version_selected' type="text" id="version_selected" readonly tabIndex="-1" :data-val='version_selected' v-model.lazy='version_selected' />
+          <label class="mdl-textfield__label" for="version_selected">Select your version</label>
+          <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu" for="version_selected">
+            <li class="mdl-menu__item" :data-val='version' v-for='version in versions'>{{ version }}</li>
+          </ul>
         </div>
-    </nav>
+        <button @click='parseConfig' class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" style="margin-left: 2rem;">
+          Open
+        </button>
+        <button @click='saveConfig' class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" style="margin-left: 2rem;">
+          Save
+        </button>
+      </div>
+      <div class="mdl-textfield mdl-js-textfield leftpanel" id="panel">
+        <textarea class="mdl-textfield__input" id="textfield" v-model="result" spellcheck="false"></textarea>
+        <label class="mdl-textfield__label" for="textfield"></label>
+      </div>
+    </main>
+  </div>
 
-    <div id="clipboard" class="modal modal-fixed-footer">
-        <div class="modal-content">
-            <h4>Copy the config</h4>
-            <div id="clipboard_print"></div>
-        </div>
-        <div class="modal-footer">
-            <a href="#" class="modal-action modal-close waves-effect waves-green btn-flat">Close</a>
-            <a id="copy" href="#" class="modal-action modal-close waves-effect waves-green btn-flat">Copy</a>
-        </div>
-    </div>
-
-    <div class="container">
-    <div class="row">
-    <div id="panel">
-    <div class="table" id="panel_d">
-        <table class="highlight bordered">
-            <tr>
-                <th>server</th>
-                <td id="server"></td>
-            </tr>
-            <tr>
-                <th>username</th>
-                <td id="username"></td>
-            </tr>
-            <tr>
-                <th>password</th>
-                <td><input type="password" id="password" placeholder="Enter Your Password, then press the Edit button"><button id="edit" class="btn waves-effect waves-light" type="submit">Edit<i class="material-icons right button-logo">info</i></button></td>
-            </tr>
-            <tr>
-                <th>CONTROLCHECKSTATUS</th>
-                <td id="CONTROLCHECKSTATUS"></td>
-            </tr>
-            <tr>
-                <th>ADAPTERNUM</th>
-                <td id="ADAPTERNUM"></td>
-            </tr>
-            <tr>
-                <th>host_ip</th>
-                <td id="host_ip"></td>
-            </tr>
-            <tr>
-                <th>IPDOG</th>
-                <td id="IPDOG"></td>
-            </tr>
-            <tr>
-                <th>host_name</th>
-                <td id="host_name"></td>
-            </tr>
-            <tr>
-                <th>PRIMARY_DNS</th>
-                <td id="PRIMARY_DNS"></td>
-            </tr>
-            <tr>
-                <th>dhcp_server</th>
-                <td id="dhcp_server"></td>
-            </tr>
-            <tr>
-                <th>AUTH_VERSION</th>
-                <td id="AUTH_VERSION"></td>
-            </tr>
-            <tr>
-                <th>mac</th>
-                <td id="mac"></td>
-            </tr>
-            <tr>
-                <th>host_os</th>
-                <td id="host_os"></td>
-            </tr>
-            <tr>
-                <th>KEEP_ALIVE_VERSION</th>
-                <td id="KEEP_ALIVE_VERSION"></td>
-            </tr>
-            <tr>
-                <th>ror_version</th>
-                <td id="ror_version"></td>
-            </tr>
-        </table>
-    </div>
-    </div>
-    </div>
-    </div>
-    <footer class="page-footer light-blue lighten-1">
-        <div class="container">
-            <div class="row">
-                <div class="col l4 s12">
-                    <h5 class="white-text">How to use it?</h5>
-                    <p class="white-text">First, upload your packet file, then fill the password block and press the EDIT button. Finally you can copy the config or save the config file. :)</p>
-                    <p class="white-text">(Modern browsers have been tested.)</p>
-                </div>
-                <div class="col l4 s12">
-                    <h5 class="white-text">Let's Discus</h5>
-                    <p class="white-text">Join the chat at Gitter with our room. If you have any problem or idea, please join the discussion</p>
-                    <a class="btn waves-effect waves-light red lighten-3" target="_blank" href="https://gitter.im/drcoms/drcom-generic">Chat</a>
-                </div>
-                <div class="col l4 s12">
-                    <h5 class="white-text">Let's Roll</h5>
-                    <iframe src="https://ghbtns.com/github-btn.html?user=drcoms&repo=drcom-generic&type=star&count=true&size=large" frameborder="0" scrolling="0" width="160px" height="30px"></iframe>
-                    <iframe src="https://ghbtns.com/github-btn.html?user=drcoms&repo=drcom-generic&type=watch&count=true&size=large&v=2" frameborder="0" scrolling="0" width="160px" height="30px"></iframe>
-                </div>
-            </div>
-        </div>
-        
-        <div class="footer-copyright">
-            <div class="container">
-                Powered by <a class="white-text text-lighten-3" href="https://github.com/drcoms">Project Drcom</a>, <a class="white-text text-lighten-3" href="https://github.com/mchome">fuyumi</a> Reserved.
-            </div>
-        </div>
-    </footer>
+  <script src="static/libs/material.min.js"></script>
+  <script src="static/libs/FileSaver.min.js"></script>
+  <script src="static/libs/getmdl-select.min.js"></script>
+  <script src="static/libs/vue.js"></script>
+  <!-- <script src="static/libs/vue.min.js"></script> -->
+  <script src="static/app.js"></script>
 </body>
+
+<style>
+  #panel {
+    width: 94%;
+    margin: 0 3rem;
+  }
+
+  #panel > textarea {
+    resize: none;
+    height: calc(100vh - 14rem);
+  }
+</style>
 </html>
