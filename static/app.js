@@ -107,11 +107,7 @@ var app = new Vue({
         var params2 = [server, pppoe_flag, keep_alive2_flag];
         var result = '';
         for (var i = 0; i <= params1.length - 1; i++) {
-          if (params1[i] == 'mac' || params1[i] == 'ror_version') {
-            result += (params1[i] + ' = ' + params2[i] + '\n');
-          } else {
-            result += (params1[i] + ' = \'' + params2[i] + '\'\n');
-          }
+          result += (params1[i] + ' = \'' + params2[i] + '\'\n');
         };
         return result.slice(0, -1);
       }
@@ -152,7 +148,11 @@ var app = new Vue({
         var params2 = [server, username, password, CONTROLCHECKSTATUS, ADAPTERNUM, host_ip, IPDOG, host_name, PRIMARY_DNS, dhcp_server, AUTH_VERSION, mac, host_os, KEEP_ALIVE_VERSION, String(ror_version).charAt(0).toUpperCase() + String(ror_version).slice(1)]
         var result = '';
         for (var i = 0; i <= params1.length - 1; i++) {
-          result += (params1[i] + ' = \'' + params2[i] + '\'\n');
+          if (params1[i] == 'mac' || params1[i] == 'ror_version') {
+            result += (params1[i] + ' = ' + params2[i] + '\n');
+          } else {
+            result += (params1[i] + ' = \'' + params2[i] + '\'\n');
+          }
         };
         return result.slice(0, -1);
       }
