@@ -362,9 +362,11 @@ def mkpkt(salt, usr, pwd, mac):
     data += '\x00\x00' # _tagDrcomAuthExtData.Option
     data += dump(mac) # _tagDrcomAuthExtData.AdapterAddress
     # END OF _tagDrcomAuthExtData
-
-    data += '\x00' # auto logout / default: False
-    data += '\x00' # broadcast mode / default : False
+    if ror_version:
+        data += '\x00' * (8 - len(pwd))
+    else:
+        data += '\x00' # auto logout / default: False
+        data += '\x00' # broadcast mode / default : False
     data += '\xE9\x13' #unknown, filled numbers randomly =w=
 
     log('[mkpkt]',data.encode('hex'))
