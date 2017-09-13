@@ -364,6 +364,8 @@ def mkpkt(salt, usr, pwd, mac):
     # END OF _tagDrcomAuthExtData
     if ror_version:
         data += '\x00' * (8 - len(pwd))
+        if len(pwd)%2:
+            data += '\x00'
     else:
         data += '\x00' # auto logout / default: False
         data += '\x00' # broadcast mode / default : False
