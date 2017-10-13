@@ -29,7 +29,7 @@ def log(*args, **kwargs):
         s += '\n\tpacket:' + binascii.hexlify(kwargs['pkt'])
     print(s)
     if DEBUG:
-        with open(LOG_PATH,'ab') as f:
+        with open(LOG_PATH,'a') as f:
             try:
                 f.write(s)
                 f.write('\n')

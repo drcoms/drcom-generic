@@ -4,7 +4,7 @@
 import socket
 import struct
 import time
-from hashlib import md5
+import hashlib
 import sys
 import os
 import random
@@ -33,6 +33,7 @@ IPDOG = '\x01'
 ror_version = False
 # CONFIG_END
 
+keep_alive1_mod = False #If you have trouble at KEEPALIVE1, turn this value to True
 nic_name = '' #Indicate your nic, e.g. 'eth0.2'.nic_name
 bind_ip = '0.0.0.0'
 
@@ -130,6 +131,49 @@ def ror(md5, pwd):
         x = ord(md5[i]) ^ ord(pwd[i])
         ret += chr(((x<<3)&0xFF) + (x>>5))
     return ret
+
+def gen_crc(data, encrypt_type):
+    DRCOM_DIAL_EXT_PROTO_CRC_INIT = 20000711
+    ret = ''
+    if encrypt_type == 0:
+        # 加密方式无
+        return struct.pack('<I',DRCOM_DIAL_EXT_PROTO_CRC_INIT) + struct.pack('<I',126)
+    elif encrypt_type == 1:
+        # 加密方式为 md5
+        foo = hashlib.md5(data).digest()
+        ret += foo[2]
+        ret += foo[3]
+        ret += foo[8]
+        ret += foo[9]
+        ret += foo[5]
+        ret += foo[6]
+        ret += foo[13]
+        ret += foo[14]
+        return ret
+    elif encrypt_type == 2:
+        # md4
+        foo = hashlib.new('md4', data).digest()
+        ret += foo[1]
+        ret += foo[2]
+        ret += foo[8]
+        ret += foo[9]
+        ret += foo[4]
+        ret += foo[5]
+        ret += foo[11]
+        ret += foo[12]
+        return ret
+    elif encrypt_type == 3:
+        # sha1
+        foo = hashlib.sha1(data).digest()
+        ret += foo[2]
+        ret += foo[3]
+        ret += foo[9]
+        ret += foo[10]
+        ret += foo[5]
+        ret += foo[6]
+        ret += foo[15]
+        ret += foo[16]
+        return ret
 
 def keep_alive_package_builder(number,random,tail,type=1,first=False):
     data = '\x07'+ chr(number) + '\x28\x00\x0b' + chr(type)
@@ -441,24 +485,63 @@ def logout(usr, pwd, svr, mac, auth_info):
             log('[logout_auth] logouted.')
 
 def keep_alive1(salt,tail,pwd,svr):
-    foo = struct.pack('!H',int(time.time())%0xFFFF)
-    data = '\xff' + md5sum('\x03\x01'+salt+pwd) + '\x00\x00\x00'
-    data += tail
-    data += foo + '\x00\x00\x00\x00'
-    log('[keep_alive1] send',data.encode('hex'))
-
-    s.sendto(data, (svr, 61440))
-    while True:
-        try:
-            data, address = s.recvfrom(1024)
-            if data[0] == '\x07':
-                break
+    if keep_alive1_mod:
+        res=''
+        while True:
+            s.sendto('\x07\x01\x08\x00\x01\x00\x00\x00', (svr, 61440))
+            log('[keep_alive1_challenge] keep_alive1_challenge packet sent.')
+            try:
+                res, address = s.recvfrom(1024)
+                log('[keep_alive1_challenge] recv', res.encode('hex'))
+            except:
+                log('[keep_alive1_challenge] timeout, retrying...')
+                continue
+            if address == (svr, 61440):
+                if res[0] == '\x07':
+                    break
+                else:
+                    raise ChallengeException
             else:
-                log('[keep-alive1]recv/not expected',data.encode('hex'))
-        except:
-            log('[keep_alive1] error', 'raise Exception to main() or keep_alive2()')
-            raise
-    log('[keep-alive1] recv',data.encode('hex'))
+                continue
+
+        seed = res[8:12]
+        encrypt_type = int(res[5].encode('hex'))
+        # encrypt_type = struct.unpack('<I', seed)[0] & 3
+        crc = gen_crc(seed, encrypt_type)
+        data = '\xFF' + '\x00'*7 + seed + crc + tail + struct.pack('!H', int(time.time())%0xFFFF)
+        log('[keep_alive1] send', data.encode('hex'))
+        s.sendto(data, (svr, 61440))
+        while True:
+            try:
+                res, address = s.recvfrom(1024)
+                if res[0] == '\x07':
+                    break
+                else:
+                    log('[keep-alive1]recv/not expected', res.encode('hex'))
+            except:
+                log('[keep-alive1] error')
+                raise
+        log('[keep-alive1]recv', res.encode('hex'))
+
+    else:
+        foo = struct.pack('!H',int(time.time())%0xFFFF)
+        data = '\xff' + md5sum('\x03\x01'+salt+pwd) + '\x00\x00\x00'
+        data += tail
+        data += foo + '\x00\x00\x00\x00'
+        log('[keep_alive1] send',data.encode('hex'))
+
+        s.sendto(data, (svr, 61440))
+        while True:
+            try:
+                data, address = s.recvfrom(1024)
+                if data[0] == '\x07':
+                    break
+                else:
+                    log('[keep-alive1]recv/not expected',data.encode('hex'))
+            except:
+                log('[keep_alive1] error', 'raise Exception to main() or keep_alive2()')
+                raise
+        log('[keep-alive1] recv', data.encode('hex'))
 
 def empty_socket_buffer():
 #empty buffer for some fucking schools
