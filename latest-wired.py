@@ -115,7 +115,7 @@ def challenge(svr,ran):
     return data[4:8]
 
 def md5sum(s):
-    m = md5()
+    m = hashlib.md5()
     m.update(s)
     return m.digest()
 
