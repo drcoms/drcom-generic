@@ -488,7 +488,7 @@ def keep_alive1(salt,tail,pwd,svr):
     if keep_alive1_mod:
         res=''
         while True:
-            s.sendto('\x07\x01\x08\x00\x01\x00\x00\x00', (svr, 61440))
+            s.sendto('\x07' + struct.pack('!B',int(time.time())%0xFF) + '\x08\x00\x01\x00\x00\x00', (svr, 61440))
             log('[keep_alive1_challenge] keep_alive1_challenge packet sent.')
             try:
                 res, address = s.recvfrom(1024)
@@ -505,8 +505,8 @@ def keep_alive1(salt,tail,pwd,svr):
                 continue
 
         seed = res[8:12]
-        encrypt_type = int(res[5].encode('hex'))
-        # encrypt_type = struct.unpack('<I', seed)[0] & 3
+        # encrypt_type = int(res[5].encode('hex'))
+        encrypt_type = struct.unpack('<I', seed)[0] & 3
         crc = gen_crc(seed, encrypt_type)
         data = '\xFF' + '\x00'*7 + seed + crc + tail + struct.pack('!H', int(time.time())%0xFFFF)
         log('[keep_alive1] send', data.encode('hex'))
