@@ -293,8 +293,7 @@ def keep_alive2(*args):
             #log('DEBUG: keep_alive2,packet 5 return\n',data.encode('hex'))
             i = (i+2) % 0xFF
         except:
-            log('[keep_alive2] error', 'raise Exception to main()')
-            raise
+            break
 
 def checksum(s):
     ret = 1234
@@ -512,15 +511,11 @@ def keep_alive1(salt,tail,pwd,svr):
         log('[keep_alive1] send', data.encode('hex'))
         s.sendto(data, (svr, 61440))
         while True:
-            try:
-                res, address = s.recvfrom(1024)
-                if res[0] == '\x07':
-                    break
-                else:
-                    log('[keep-alive1]recv/not expected', res.encode('hex'))
-            except:
-                log('[keep-alive1] error')
-                raise
+            res, address = s.recvfrom(1024)
+            if res[0] == '\x07':
+                break
+            else:
+                log('[keep-alive1]recv/not expected', res.encode('hex'))
         log('[keep-alive1]recv', res.encode('hex'))
 
     else:
@@ -532,15 +527,11 @@ def keep_alive1(salt,tail,pwd,svr):
 
         s.sendto(data, (svr, 61440))
         while True:
-            try:
-                data, address = s.recvfrom(1024)
-                if data[0] == '\x07':
-                    break
-                else:
-                    log('[keep-alive1]recv/not expected',data.encode('hex'))
-            except:
-                log('[keep_alive1] error', 'raise Exception to main() or keep_alive2()')
-                raise
+            data, address = s.recvfrom(1024)
+            if data[0] == '\x07':
+                break
+            else:
+                log('[keep-alive1]recv/not expected',data.encode('hex'))
         log('[keep-alive1] recv', data.encode('hex'))
 
 def empty_socket_buffer():
@@ -575,17 +566,8 @@ def main():
         log('package_tail',package_tail.encode('hex'))
         #keep_alive1 is fucking bullshit!
         empty_socket_buffer()
-        try:
-            keep_alive1(SALT,package_tail,password,server)
-            keep_alive2(SALT,package_tail,password,server)
-        except Exception as e:
-            print(e)
-            log('[main] error', 'something was wrong in keep_alives, do everything again')
-            log(traceback.format_exc())
-            time.sleep(3)
-            #empty socket buffer before relogin
-            empty_socket_buffer()
-            continue
+	    keep_alive1(SALT,package_tail,password,server)
+	    keep_alive2(SALT,package_tail,password,server)
 
 if __name__ == "__main__":
     main()
