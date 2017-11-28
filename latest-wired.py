@@ -566,8 +566,8 @@ def main():
         log('package_tail',package_tail.encode('hex'))
         #keep_alive1 is fucking bullshit!
         empty_socket_buffer()
-	    keep_alive1(SALT,package_tail,password,server)
-	    keep_alive2(SALT,package_tail,password,server)
+        keep_alive1(SALT,package_tail,password,server)
+        keep_alive2(SALT,package_tail,password,server)
 
 if __name__ == "__main__":
     main()
