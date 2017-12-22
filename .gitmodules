@@ -1,0 +1,9 @@
+[submodule "c_version/dogcom"]
+	path = c_version/dogcom
+	url = https://github.com/mchome/dogcom
+[submodule "c_version/openwrt-dogcom"]
+	path = c_version/openwrt-dogcom
+	url = https://github.com/mchome/openwrt-dogcom
+[submodule "c_version/luci-app-dogcom"]
+	path = c_version/luci-app-dogcom
+	url = https://github.com/mchome/luci-app-dogcom
