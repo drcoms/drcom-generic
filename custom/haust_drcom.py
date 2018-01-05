@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+
 
 import socket
 import struct
@@ -12,8 +11,8 @@ import binascii
 
 # CONFIG
 server = '210.43.0.195'
-username='151416120408'#学号
-password='19960202'#密码
+username='15××××'#学号
+password='****'#密码
 CONTROLCHECKSTATUS = b'\x20'
 ADAPTERNUM = b'\x03'
 host_ip = '172.20.63.77'
