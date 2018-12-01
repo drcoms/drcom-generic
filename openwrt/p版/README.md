@@ -2,8 +2,10 @@ p版python使用教程；
 
 1、
    将三个文件夹拉入root文件夹中，使用 'scp -r 文件夹 /' 命令将三个文件夹覆盖进去。
+   
 2、
    修改文件权限为777，右键属性修改。
+   
 3、
    拨号：在putty直接粘贴这几条命令：
    #!/bin/sh
@@ -11,6 +13,7 @@ p版python使用教程；
    sed -i '/proto_run_command/i username=`echo -e "$username"`' /lib/netifd/proto/ppp.sh
    sed -i '/proto_run_command/i password=`echo -e "$password"`' /lib/netifd/proto/ppp.sh
    拨号账号要加上\r\n
+   
 4、安装python：
 闪存剩余大小低于7.5M，安以下方式安装
 
