@@ -1,0 +1,7 @@
+
+config drcom
+	option keep_alive2_flag '\xdc'
+	option server '10.0.3.2'
+	option pppoe_flag '\x2f'
+	option enable '1'
+

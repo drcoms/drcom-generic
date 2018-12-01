@@ -1,0 +1,12 @@
+#!/bin/sh
+# Copyright (c) 2014 OpenWrt
+# Copyright (c) 2016 Sui <sun521xiaolei@gmail.com>
+curdir=/etc/config/drcom.conf
+touch $curdir
+tmp_server="server = '$(uci get drcom.@drcom[0].server)'"
+tmp_pppoe_flag="pppoe_flag = '$(uci get drcom.@drcom[0].pppoe_flag)'"
+tmp_keep_alive2_flag="keep_alive2_flag = '$(uci get drcom.@drcom[0].keep_alive2_flag)'"
+echo $tmp_server >> $curdir
+echo "$tmp_pppoe_flag" >> "$curdir"
+echo "$tmp_keep_alive2_flag" >> "$curdir"
+
