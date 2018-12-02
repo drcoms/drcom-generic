@@ -1,402 +1,575 @@
-# coding=UTF-8
-# test version
-# Licensed under the AGPLv3
-# thx all authors before
-# limitless 2018
-# 此版本适配北京信息科技大学
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#updated on 14 Oct
+#不明作者 原repo的已经失效 本作至2018-11-30仍可用
 
-import socket, struct, time, random, re, os
-from hashlib import md5
-#time.sleep(30)
-# config
-server = '192.168.211.3'
-#username = 'xxxx'  # 学号
-#password = 'xxxx'  # 密码
+import socket
+import struct
+import time
+import hashlib
+import sys
+import os
+import random
+import traceback
+
+# CONFIG
+server = "192.168.211.3"
+username = "" #学号
+password = "" #密码
+host_name = "Thiasap"
+host_os = "Windows10"
+host_ip = "10.15.143.178"
+PRIMARY_DNS = "211.82.96.1"
+dhcp_server = "211.82.99.88"
+mac = 0x80fa5b42e8a4
 CONTROLCHECKSTATUS = '\x20'
 ADAPTERNUM = '\x04'
-host_ip = '10.1.55.17'
-# host_ip = '10.15.125.133'  #dhcp到的ip地址
-IPDOG = '\x01'
-host_name = 'DRFUCKER'
-PRIMARY_DNS = '211.82.96.1'
-dhcp_server = '211.68.32.204'
-AUTH_VERSION = '\x0a\x00'
-#mac = 0x001c4209e63c
-mac = 0xb827eb497796
-host_os = 'WINDIAOS'
 KEEP_ALIVE_VERSION = '\xdc\x02'
+'''
+AUTH_VERSION:
+    unsigned char ClientVerInfoAndInternetMode;
+    unsigned char DogVersion;
+'''
+AUTH_VERSION = '\x0a\x00'
+IPDOG = '\x01'
+ror_version = False
+# CONFIG_END
 
+keep_alive1_mod = False #If you have trouble at KEEPALIVE1, turn this value to True
+nic_name = '' #Indicate your nic, e.g. 'eth0.2'.nic_name
+bind_ip = '0.0.0.0'
 
-# config_end
+class ChallengeException (Exception):
+    def __init__(self):
+        pass
 
-class ChallengeException(Exception):
-	def __init__(self):
-		pass
+class LoginException (Exception):
+    def __init__(self):
+        pass
 
+def bind_nic():
+    try:
+        import fcntl
+        def get_ip_address(ifname):
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            return socket.inet_ntoa(fcntl.ioctl(
+                s.fileno(),
+                0x8915,  # SIOCGIFADDR
+                struct.pack('256s', ifname[:15])
+            )[20:24])
+        return get_ip_address(nic_name)
+    except ImportError as e:
+        print('Indicate nic feature need to be run under Unix based system.')
+        return '0.0.0.0'
+    except IOError as e:
+        print(nic_name + 'is unacceptable !')
+        return '0.0.0.0'
+    finally:
+        return '0.0.0.0'
 
-class loginException(Exception):
-	def __init__(self):
-		pass
+if nic_name != '':
+    bind_ip = bind_nic()
 
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+# s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+s.bind((bind_ip, 61440))
 
-def NetBroken():
-	ResultOfPing = os.system('ping 119.75.216.20 -c 1 > /dev/null')
-	if ResultOfPing:
-		print('Bad connection')
-		return True
-	else:
-		print('connection is OK')
-		return False
-
-
-def try_socket():
-	# sometimes cannot get the port
-	global s, salt
-	try:
-		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		s.bind(("0.0.0.0", 61440))
-		s.settimeout(3)
-	except:
-		print ".",
-		time.sleep(0.5)
-		print ".",
-		time.sleep(0.5)
-		print "."
-		time.sleep(0.5)
-		print "...wait 3 seconds"
-		time.sleep(3)
-		version()
-		main()
-	else:
-		SALT = ''
-
-
+s.settimeout(3)
+SALT = ''
+IS_TEST = False
+# specified fields based on version
+CONF = "/etc/drcom.conf"
 UNLIMITED_RETRY = True
 EXCEPTION = False
+DEBUG = False #log saves to file
+LOG_PATH = '/var/log/drcom_client.log'
+if IS_TEST:
+    DEBUG = True
+    LOG_PATH = 'drcom_client.log'
 
 
-def randomMAC():
-	mac = [0x0a, 0x16, 0x00,
-	       random.randint(0x00, 0x7f),
-	       random.randint(0x00, 0xff),
-	       random.randint(0x00, 0xff)]
-	return long(''.join(map(lambda x: "%02x" % x, mac)), 16)
+def log(*args, **kwargs):
+    s = ' '.join(args)
+    print s
+    if DEBUG:
+        with open(LOG_PATH,'a') as f:
+            f.write(s + '\n')
 
-
-def version():
-	print "====================================================================="
-	print "DrCOM Auth Router for u6x"
-	print "with keep-alive1&keep-alive2"
-	print "====================================================================="
-
-
-def challenge(svr, ran):
-	while True:
-		t = struct.pack("<H", int(ran) % (0xFFFF))
-		s.sendto("\x01\x02" + t + "\x09" + "\x00" * 15, (svr, 61440))
-		try:
-			data, address = s.recvfrom(1024)
-			# print('[challenge] recv',data.encode('hex'))
-		except:
-			print('[challenge] timeout, retrying...')
-			continue
-
-		if address == (svr, 61440):
-			break
-		else:
-			continue
-	# print('[DEBUG] challenge:\n' + data.encode('hex'))
-	if data[0] != '\x02':
-		raise ChallengeException
-	print('[challenge] challenge packet sent.')
-	return data[4:8]
-
+def challenge(svr,ran):
+    while True:
+        t = struct.pack("<H", int(ran)%(0xFFFF))
+        s.sendto("\x01\x02"+t+"\x09"+"\x00"*15, (svr, 61440))
+        try:
+            data, address = s.recvfrom(1024)
+            log('[challenge] recv',data.encode('hex'))
+        except:
+            log('[challenge] timeout, retrying...')
+            continue
+        
+        if address == (svr, 61440):
+            break
+        else:
+            continue
+    log('[DEBUG] challenge:\n' + data.encode('hex'))
+    if data[0] != '\x02':
+        raise ChallengeException
+    log('[challenge] challenge packet sent.')
+    return data[4:8]
 
 def md5sum(s):
-	m = md5()
-	m.update(s)
-	return m.digest()
-
+    m = hashlib.md5()
+    m.update(s)
+    return m.digest()
 
 def dump(n):
-	s = '%x' % n
-	if len(s) & 1:
-		s = '0' + s
-	return s.decode('hex')
-
+    s = '%x' % n
+    if len(s) & 1:
+        s = '0' + s
+    return s.decode('hex')
 
 def ror(md5, pwd):
-	ret = ''
-	for i in range(len(pwd)):
-		x = ord(md5[i]) ^ ord(pwd[i])
-		ret += chr(((x << 3) & 0xFF) + (x >> 5))
-	return ret
+    ret = ''
+    for i in range(len(pwd)):
+        x = ord(md5[i]) ^ ord(pwd[i])
+        ret += chr(((x<<3)&0xFF) + (x>>5))
+    return ret
 
+def gen_crc(data, encrypt_type):
+    DRCOM_DIAL_EXT_PROTO_CRC_INIT = 20000711
+    ret = ''
+    if encrypt_type == 0:
+        # 加密方式无
+        return struct.pack('<I',DRCOM_DIAL_EXT_PROTO_CRC_INIT) + struct.pack('<I',126)
+    elif encrypt_type == 1:
+        # 加密方式为 md5
+        foo = hashlib.md5(data).digest()
+        ret += foo[2]
+        ret += foo[3]
+        ret += foo[8]
+        ret += foo[9]
+        ret += foo[5]
+        ret += foo[6]
+        ret += foo[13]
+        ret += foo[14]
+        return ret
+    elif encrypt_type == 2:
+        # md4
+        foo = hashlib.new('md4', data).digest()
+        ret += foo[1]
+        ret += foo[2]
+        ret += foo[8]
+        ret += foo[9]
+        ret += foo[4]
+        ret += foo[5]
+        ret += foo[11]
+        ret += foo[12]
+        return ret
+    elif encrypt_type == 3:
+        # sha1
+        foo = hashlib.sha1(data).digest()
+        ret += foo[2]
+        ret += foo[3]
+        ret += foo[9]
+        ret += foo[10]
+        ret += foo[5]
+        ret += foo[6]
+        ret += foo[15]
+        ret += foo[16]
+        return ret
 
-def keep_alive_package_builder(number, random, tail, type=1, first=False):
-	data = '\x07' + chr(number) + '\x28\x00\x0b' + chr(type)
-	data += KEEP_ALIVE_VERSION + '\x2f\x12' + '\x00' * 6
-	data += tail
-	data += '\x00' * 4
-	# data += struct.pack("!H",0xdc02)
-	if type == 3:
-		foo = ''.join([chr(int(i)) for i in host_ip.split('.')])  # host_ip
-		# use double keep in main to keep online .Ice
-		crc = '\x00' * 4
-		# data += struct.pack("!I",crc) + foo + '\x00' * 8
-		data += crc + foo + '\x00' * 8
-	else:  # packet type = 1
-		data += '\x00' * 16
-	return data
+def keep_alive_package_builder(number,random,tail,type=1,first=False):
+    data = '\x07'+ chr(number) + '\x28\x00\x0b' + chr(type)
+    if first :
+        data += '\x0f\x27'
+    else:
+        data += KEEP_ALIVE_VERSION
+    data += '\x2f\x12' + '\x00' * 6
+    data += tail
+    data += '\x00' * 4
+    #data += struct.pack("!H",0xdc02)
+    if type == 3:
+        foo = ''.join([chr(int(i)) for i in host_ip.split('.')]) # host_ip
+        #CRC
+        # edited on 2014/5/12, filled zeros to checksum
+        # crc = packet_CRC(data+foo)
+        crc = '\x00' * 4
+        #data += struct.pack("!I",crc) + foo + '\x00' * 8
+        data += crc + foo + '\x00' * 8
+    else: #packet type = 1
+        data += '\x00' * 16
+    return data
 
-
-def packet_CRC(s):
-	ret = 0
-	for i in re.findall('..', s):
-		ret ^= struct.unpack('>h', i)[0]
-		ret &= 0xFFFF
-	ret = ret * 0x2c7
-	return ret
-
+# def packet_CRC(s):
+#     ret = 0
+#     for i in re.findall('..', s):
+#         ret ^= struct.unpack('>h', i)[0]
+#         ret &= 0xFFFF
+#     ret = ret * 0x2c7
+#     return ret
 
 def keep_alive2(*args):
-	tail = ''
-	packet = ''
-	svr = server
-	ran = random.randint(0, 0xFFFF)
-	ran += random.randint(1, 10)
+    #first keep_alive:
+    #number = number (mod 7)
+    #status = 1: first packet user sended
+    #         2: first packet user recieved
+    #         3: 2nd packet user sended
+    #         4: 2nd packet user recieved
+    #   Codes for test
+    tail = ''
+    packet = ''
+    svr = server
+    ran = random.randint(0,0xFFFF)
+    ran += random.randint(1,10)   
+    # 2014/10/15 add by latyas, maybe svr sends back a file packet
+    svr_num = 0
+    packet = keep_alive_package_builder(svr_num,dump(ran),'\x00'*4,1,True)
+    while True:
+        log('[keep-alive2] send1',packet.encode('hex'))
+        s.sendto(packet, (svr, 61440))
+        data, address = s.recvfrom(1024)
+        log('[keep-alive2] recv1',data.encode('hex'))
+        if data.startswith('\x07\x00\x28\x00') or data.startswith('\x07' + chr(svr_num)  + '\x28\x00'):
+            break
+        elif data[0] == '\x07' and data[2] == '\x10':
+            log('[keep-alive2] recv file, resending..')
+            svr_num = svr_num + 1
+            # packet = keep_alive_package_builder(svr_num,dump(ran),'\x00'*4,1, False)
+            break
+        else:
+            log('[keep-alive2] recv1/unexpected',data.encode('hex'))
+    #log('[keep-alive2] recv1',data.encode('hex'))
+    
+    ran += random.randint(1,10)   
+    packet = keep_alive_package_builder(svr_num, dump(ran),'\x00'*4,1,False)
+    log('[keep-alive2] send2',packet.encode('hex'))
+    s.sendto(packet, (svr, 61440))
+    while True:
+        data, address = s.recvfrom(1024)
+        if data[0] == '\x07':
+            svr_num = svr_num + 1
+            break
+        else:
+            log('[keep-alive2] recv2/unexpected',data.encode('hex'))
+    log('[keep-alive2] recv2',data.encode('hex'))
+    tail = data[16:20]
 
-	packet = keep_alive_package_builder(0, dump(ran), '\x00' * 4, 1, True)
-	# packet = keep_alive_package_builder(0,dump(ran),dump(ran)+'\x22\x06',1,True)
-	print '[keep-alive2] send1'  # packet.encode('hex')
-	while True:
-		s.sendto(packet, (svr, 61440))
-		data, address = s.recvfrom(1024)
-		if data.startswith('\x07'):
-			break
-		else:
-			continue
-		# print '[keep-alive2] recv/unexpected',data.encode('hex')
-	# print '[keep-alive2] recv1',data.encode('hex')
 
-	ran += random.randint(1, 10)
-	packet = keep_alive_package_builder(1, dump(ran), '\x00' * 4, 1, False)
-	# print '[keep-alive2] send2',packet.encode('hex')
-	s.sendto(packet, (svr, 61440))
-	while True:
-		data, address = s.recvfrom(1024)
-		if data[0] == '\x07':
-			break
-	# print '[keep-alive2] recv2',data.encode('hex')
-	tail = data[16:20]
-
-	ran += random.randint(1, 10)
-	packet = keep_alive_package_builder(2, dump(ran), tail, 3, False)
-	# print '[keep-alive2] send3',packet.encode('hex')
-	s.sendto(packet, (svr, 61440))
-	while True:
-		data, address = s.recvfrom(1024)
-		if data[0] == '\x07':
-			break
-	# print '[keep-alive2] recv3',data.encode('hex')
-	tail = data[16:20]
-	print "[keep-alive] keep-alive loop was in daemon."
-	i = 3
-
-	while True:
-		try:
-			keep_alive1(SALT, package_tail, password, server)
-			print '[keep-alive2] send'
-			ran += random.randint(1, 10)
-			packet = keep_alive_package_builder(i, dump(ran), tail, 1, False)
-			# print('DEBUG: keep_alive2,packet 4\n',packet.encode('hex'))
-			# print '[keep_alive2] send',str(i),packet.encode('hex')
-			s.sendto(packet, (svr, 61440))
-			data, address = s.recvfrom(1024)
-			# print '[keep_alive2] recv',data.encode('hex')
-			tail = data[16:20]
-			# print('DEBUG: keep_alive2,packet 4 return\n',data.encode('hex'))
-
-			ran += random.randint(1, 10)
-			packet = keep_alive_package_builder(i + 1, dump(ran), tail, 3, False)
-			# print('DEBUG: keep_alive2,packet 5\n',packet.encode('hex'))
-			s.sendto(packet, (svr, 61440))
-			# print('[keep_alive2] send',str(i+1),packet.encode('hex'))
-			data, address = s.recvfrom(1024)
-			# print('[keep_alive2] recv',data.encode('hex'))
-			tail = data[16:20]
-			# print('DEBUG: keep_alive2,packet 5 return\n',data.encode('hex'))
-			i = (i + 2) % 0xFF
-			time.sleep(20)
-			if NetBroken():
-				break
-		except:
-			pass
-
+    ran += random.randint(1,10)   
+    packet = keep_alive_package_builder(svr_num,dump(ran),tail,3,False)
+    log('[keep-alive2] send3',packet.encode('hex'))
+    s.sendto(packet, (svr, 61440))
+    while True:
+        data, address = s.recvfrom(1024)
+        if data[0] == '\x07':
+            svr_num = svr_num + 1
+            break
+        else:
+            log('[keep-alive2] recv3/unexpected',data.encode('hex'))
+    log('[keep-alive2] recv3',data.encode('hex'))
+    tail = data[16:20]
+    log("[keep-alive2] keep-alive2 loop was in daemon.")
+    
+    i = svr_num
+    while True:
+        try:
+            time.sleep(20)
+            keep_alive1(*args)
+            ran += random.randint(1,10)   
+            packet = keep_alive_package_builder(i,dump(ran),tail,1,False)
+            #log('DEBUG: keep_alive2,packet 4\n',packet.encode('hex'))
+            log('[keep_alive2] send',str(i),packet.encode('hex'))
+            s.sendto(packet, (svr, 61440))
+            data, address = s.recvfrom(1024)
+            log('[keep_alive2] recv',data.encode('hex'))
+            tail = data[16:20]
+            #log('DEBUG: keep_alive2,packet 4 return\n',data.encode('hex'))
+        
+            ran += random.randint(1,10)   
+            packet = keep_alive_package_builder(i+1,dump(ran),tail,3,False)
+            #log('DEBUG: keep_alive2,packet 5\n',packet.encode('hex'))
+            s.sendto(packet, (svr, 61440))
+            log('[keep_alive2] send',str(i+1),packet.encode('hex'))
+            data, address = s.recvfrom(1024)
+            log('[keep_alive2] recv',data.encode('hex'))
+            tail = data[16:20]
+            #log('DEBUG: keep_alive2,packet 5 return\n',data.encode('hex'))
+            i = (i+2) % 0xFF
+        except:
+            break
 
 def checksum(s):
-	ret = 1234
-	for i in re.findall('....', s):
-		ret ^= int(i[::-1].encode('hex'), 16)
-	ret = (1968 * ret) & 0xffffffff
-	return struct.pack('<I', ret)
-
+    ret = 1234
+    x = 0
+    for i in [x*4 for x in range(0, -(-len(s)//4))]:
+        ret ^= int(s[i:i+4].ljust(4, '\x00')[::-1].encode('hex'), 16)
+    ret = (1968 * ret) & 0xffffffff
+    return struct.pack('<I', ret)
 
 def mkpkt(salt, usr, pwd, mac):
-	data = '\x03\x01\x00' + chr(len(usr) + 20)
-	data += md5sum('\x03\x01' + salt + pwd)
-	data += usr.ljust(36, '\x00')
-	data += '\x20'  # fixed unknow 1
-	data += '\x02'  # unknow 2
-	data += dump(int(data[4:10].encode('hex'), 16) ^ mac).rjust(6, '\x00')  # mac xor md51
-	data += md5sum("\x01" + pwd + salt + '\x00' * 4)  # md52
-	data += '\x01'  # NIC count
-	data += hexip  # your ip address1
-	data += '\00' * 4  # your ipaddress 2
-	data += '\00' * 4  # your ipaddress 3
-	data += '\00' * 4  # your ipaddress 4
-	data += md5sum(data + '\x14\x00\x07\x0b')[:8]  # md53
-	data += '\x01'  # ipdog
-	data += '\x00' * 4  # delimeter
-	data += host_name.ljust(32, '\x00')
-	data += '\x72\x72\x72\x72'  # primary dns: 114.114.114.114
-	data += '\x0a\xff\x00\xc5'  # DHCP server
-	data += '\x08\x08\x08\x08'  # secondary dns:8.8.8.8
-	data += '\x00' * 8  # delimeter
-	data += '\x94\x00\x00\x00'  # unknow
-	data += '\x05\x00\x00\x00'  # os major
-	data += '\x01\x00\x00\x00'  # os minor
-	data += '\x28\x0a\x00\x00'  # OS build
-	data += '\x02\x00\x00\x00'  # os unknown
-	data += host_os.ljust(32, '\x00')
-	data += '\x00' * 96
-	# data += '\x01' + host_os.ljust(128, '\x00')
-	# data += '\x0a\x00\x00'+chr(len(pwd)) # \0x0a represents version of client, algorithm: DRCOM_VER + 100
-	# data += ror(md5sum('\x03\x01'+salt+pwd), pwd)
-	data += AUTH_VERSION
-	data += '\x02\x0c'
-	data += checksum(data + '\x01\x26\x07\x11\x00\x00' + dump(mac))
-	data += '\x00\x00'  # delimeter
-	data += dump(mac)
-	data += '\x00'  # auto logout / default: False
-	data += '\x00'  # broadcast mode / default : False
-	data += '\xe8\x90'  # unknown
+    '''
+	struct  _tagLoginPacket
+	{
+	    struct _tagDrCOMHeader Header;
+	    unsigned char PasswordMd5[MD5_LEN];
+	    char Account[ACCOUNT_MAX_LEN];
+	    unsigned char ControlCheckStatus;
+	    unsigned char AdapterNum;
+	    unsigned char MacAddrXORPasswordMD5[MAC_LEN];
+	    unsigned char PasswordMd5_2[MD5_LEN];
+	    unsigned char HostIpNum;
+	    unsigned int HostIPList[HOST_MAX_IP_NUM];
+	    unsigned char HalfMD5[8];
+	    unsigned char DogFlag;
+	    unsigned int unkown2;
+	    struct _tagHostInfo HostInfo;
+	    unsigned char ClientVerInfoAndInternetMode;
+	    unsigned char DogVersion;
+	};
+    '''
+    data = '\x03\x01\x00' + chr(len(usr) + 20)
+    data += md5sum('\x03\x01' + salt + pwd)
+    data += usr.ljust(36, '\x00')
+    data += CONTROLCHECKSTATUS
+    data += ADAPTERNUM
+    data += dump(int(data[4:10].encode('hex'),16)^mac).rjust(6, '\x00') #mac xor md51
+    data += md5sum("\x01" + pwd + salt + '\x00' * 4) #md52
+    data += '\x01' # number of ip
+    data += ''.join([chr(int(i)) for i in host_ip.split('.')]) #x.x.x.x -> 
+    data += '\00' * 4 #your ipaddress 2
+    data += '\00' * 4 #your ipaddress 3
+    data += '\00' * 4 #your ipaddress 4
+    data += md5sum(data + '\x14\x00\x07\x0B')[:8] #md53
+    data += IPDOG
+    data += '\x00'*4 # unknown2
+    '''
+	struct  _tagOSVERSIONINFO
+	{
+	    unsigned int OSVersionInfoSize;
+	    unsigned int MajorVersion;
+	    unsigned int MinorVersion;
+	    unsigned int BuildNumber;
+	    unsigned int PlatformID;
+	    char ServicePack[128];
+	};
+	struct  _tagHostInfo
+	{
+	    char HostName[HOST_NAME_MAX_LEN];
+	    unsigned int DNSIP1;
+	    unsigned int DHCPServerIP;
+	    unsigned int DNSIP2;
+	    unsigned int WINSIP1;
+	    unsigned int WINSIP2;
+	    struct _tagDrCOM_OSVERSIONINFO OSVersion;
+	};
+    '''
+    data += host_name.ljust(32, '\x00') # _tagHostInfo.HostName
+    data += ''.join([chr(int(i)) for i in PRIMARY_DNS.split('.')]) # _tagHostInfo.DNSIP1
+    data += ''.join([chr(int(i)) for i in dhcp_server.split('.')]) # _tagHostInfo.DHCPServerIP
+    data += '\x00\x00\x00\x00' # _tagHostInfo.DNSIP2
+    data += '\x00' * 4 # _tagHostInfo.WINSIP1
+    data += '\x00' * 4 # _tagHostInfo.WINSIP2
+    data += '\x94\x00\x00\x00' # _tagHostInfo.OSVersion.OSVersionInfoSize
+    data += '\x05\x00\x00\x00' # _tagHostInfo.OSVersion.MajorVersion
+    data += '\x01\x00\x00\x00' # _tagHostInfo.OSVersion.MinorVersion
+    data += '\x28\x0A\x00\x00' # _tagHostInfo.OSVersion.BuildNumber
+    data += '\x02\x00\x00\x00' # _tagHostInfo.OSVersion.PlatformID
+    # _tagHostInfo.OSVersion.ServicePack
+    data += host_os.ljust(32, '\x00')
+    data += '\x00' * 96
+    # END OF _tagHostInfo
 
-	return data
+    data += AUTH_VERSION
+    if ror_version:
+        '''
+	struct  _tagLDAPAuth
+	{
+	    unsigned char Code;
+	    unsigned char PasswordLen;
+	    unsigned char Password[MD5_LEN];
+	};
+        '''
+        data += '\x00' # _tagLDAPAuth.Code
+        data += chr(len(pwd)) # _tagLDAPAuth.PasswordLen
+        data += ror(md5sum('\x03\x01' + salt + pwd), pwd) # _tagLDAPAuth.Password
+    '''
+	struct  _tagDrcomAuthExtData
+	{
+	    unsigned char Code;
+	    unsigned char Len;
+	    unsigned long CRC;
+	    unsigned short Option;
+	    unsigned char AdapterAddress[MAC_LEN];
+	};
+    '''
+    data += '\x02' # _tagDrcomAuthExtData.Code
+    data += '\x0C' # _tagDrcomAuthExtData.Len
+    data += checksum(data + '\x01\x26\x07\x11\x00\x00' + dump(mac)) # _tagDrcomAuthExtData.CRC
+    data += '\x00\x00' # _tagDrcomAuthExtData.Option
+    data += dump(mac) # _tagDrcomAuthExtData.AdapterAddress
+    # END OF _tagDrcomAuthExtData
+    if ror_version:
+        data += '\x00' * (8 - len(pwd))
+        if len(pwd)%2:
+            data += '\x00'
+    else:
+        data += '\x00' # auto logout / default: False
+        data += '\x00' # broadcast mode / default : False
+    data += '\xE9\x13' #unknown, filled numbers randomly =w=
 
+    log('[mkpkt]',data.encode('hex'))
+    return data
 
 def login(usr, pwd, svr):
-	global SALT
+    global SALT
+    global AUTH_INFO
 
-	i = 0
-	while True:
-		salt = challenge(svr, time.time() + random.randint(0xF, 0xFF))
-		SALT = salt
-		packet = mkpkt(salt, usr, pwd, mac)
-		# print('[login] send',packet.encode('hex'))
-		s.sendto(packet, (svr, 61440))
-		data, address = s.recvfrom(1024)
-		# print('[login] recv',data.encode('hex'))
-		print('[login] packet sent.')
-		if address == (svr, 61440):
-			if data[0] == '\x04':
-				print('[login] login in')
-				break
-			else:
-				continue
-		else:
-			if i >= 5 and UNLIMITED_RETRY == False:
-				print('[login] exception occured.')
-				sys.exit(1)
-			else:
-				continue
+    i = 0
+    timeoutcount = 0
+    while True:
+        salt = challenge(svr,time.time()+random.randint(0xF,0xFF))
+        SALT = salt
+        packet = mkpkt(salt, usr, pwd, mac)
+        log('[login] send',packet.encode('hex'))
+        s.sendto(packet, (svr, 61440))
+        log('[login] packet sent.')
+        try:
+            data, address = s.recvfrom(1024)
+            log('[login] recv',data.encode('hex'))
+            if address == (svr, 61440) :
+                if data[0] == '\x04':
+                    log('[login] loged in')
+                    AUTH_INFO = data[23:39]
+                    break
+                else:
+                    log('[login] login failed.')
+                    if IS_TEST:
+                        time.sleep(3)
+                    else:
+                        time.sleep(30)
+                    continue
+            else:
+                if i >= 5 and UNLIMITED_RETRY == False :
+                    log('[login] exception occured.')
+                    sys.exit(1)
+                else:
+                    i += 1
+                    continue
+        except socket.timeout as e:
+            print(e)
+            log('[login] recv timeout.')
+            timeoutcount += 1
+            if timeoutcount >= 5:
+                log('[login] recv timeout exception occured 5 times.')
+                sys.exit(1)
+            else:
+                continue
 
-	print('[login] login Success')
-	return data[23:39]
-	# return data[-22:-6]
+    log('[login] login sent')
+    #0.8 changed:
+    return data[23:39]
+    #return data[-22:-6]
 
+def logout(usr, pwd, svr, mac, auth_info):
+    salt = challenge(svr, time.time()+random.randint(0xF, 0xFF))
+    if salt:
+        data = '\x06\x01\x00' + chr(len(usr) + 20)
+        data += md5sum('\x03\x01' + salt + pwd)
+        data += usr.ljust(36, '\x00')
+        data += CONTROLCHECKSTATUS
+        data += ADAPTERNUM
+        data += dump(int(data[4:10].encode('hex'),16)^mac).rjust(6, '\x00')
+        # data += '\x44\x72\x63\x6F' # Drco
+        data += auth_info
+        s.send(data)
+        data, address = s.recvfrom(1024)
+        if data[:1] == '\x04':
+            log('[logout_auth] logouted.')
 
-def keep_alive1(salt, tail, pwd, svr):
-	foo = struct.pack('!H', int(time.time()) % 0xFFFF)
-	data = '\xff' + md5sum('\x03\x01' + salt + pwd) + '\x00\x00\x00'
-	data += tail
-	data += foo + '\x00\x00\x00\x00'
-	print '[keep_alive1] send'  # data.encode('hex'))
+def keep_alive1(salt,tail,pwd,svr):
+    if keep_alive1_mod:
+        res=''
+        while True:
+            s.sendto('\x07' + struct.pack('!B',int(time.time())%0xFF) + '\x08\x00\x01\x00\x00\x00', (svr, 61440))
+            log('[keep_alive1_challenge] keep_alive1_challenge packet sent.')
+            try:
+                res, address = s.recvfrom(1024)
+                log('[keep_alive1_challenge] recv', res.encode('hex'))
+            except:
+                log('[keep_alive1_challenge] timeout, retrying...')
+                continue
+            if address == (svr, 61440):
+                if res[0] == '\x07':
+                    break
+                else:
+                    raise ChallengeException
+            else:
+                continue
 
-	s.sendto(data, (svr, 61440))
-	while True:
-		if NetBroken():
-			break
-		data, address = s.recvfrom(1024)
-		if data[0] == '\x07':
-			break
-		else:
-			print '[keep-alive1]recv/not expected'  # data.encode('hex')
-			# print('[keep-alive1] recv',data.encode('hex'))
+        seed = res[8:12]
+        # encrypt_type = int(res[5].encode('hex'))
+        encrypt_type = struct.unpack('<I', seed)[0] & 3
+        crc = gen_crc(seed, encrypt_type)
+        data = '\xFF' + '\x00'*7 + seed + crc + tail + struct.pack('!H', int(time.time())%0xFFFF)
+        log('[keep_alive1] send', data.encode('hex'))
+        s.sendto(data, (svr, 61440))
+        while True:
+            res, address = s.recvfrom(1024)
+            if res[0] == '\x07':
+                break
+            else:
+                log('[keep-alive1]recv/not expected', res.encode('hex'))
+        log('[keep-alive1]recv', res.encode('hex'))
 
+    else:
+        foo = struct.pack('!H',int(time.time())%0xFFFF)
+        data = '\xff' + md5sum('\x03\x01'+salt+pwd) + '\x00\x00\x00'
+        data += tail
+        data += foo + '\x00\x00\x00\x00'
+        log('[keep_alive1] send',data.encode('hex'))
+
+        s.sendto(data, (svr, 61440))
+        while True:
+            data, address = s.recvfrom(1024)
+            if data[0] == '\x07':
+                break
+            else:
+                log('[keep-alive1]recv/not expected',data.encode('hex'))
+        log('[keep-alive1] recv', data.encode('hex'))
 
 def empty_socket_buffer():
-	# empty buffer
-	print('starting to empty socket buffer')
-	try:
-		while True:
-			data, address = s.recvfrom(1024)
-			# print 'recived sth unexcepted',data.encode('hex')
-			if s == '':
-				break
-	except:
-		# get exception means it has done.
-		print('exception in empty_socket_buffer')
-		pass
-	print('emptyed')
-
-
+#empty buffer for some fucking schools
+    log('starting to empty socket buffer')
+    try:
+        while True:
+            data, address = s.recvfrom(1024)
+            log('recived sth unexpected',data.encode('hex'))
+            if s == '':
+                break
+    except:
+        # get exception means it has done.
+        log('exception in empty_socket_buffer')
+        pass
+    log('emptyed')
+def daemon():
+    with open('/var/run/jludrcom.pid','w') as f:
+        f.write(str(os.getpid()))
+        
 def main():
-	global server, username, password, host_name, host_os, dhcp_server, mac, hexip, host_ip
-	'''
-	print("Username:")
-	username=raw_input()
-	print("Password:")
-	password=raw_input()
-	print("Host_ip:")
-	host_ip=raw_input()
-	mac=randomMAC()
-	'''
-	print("Use randomMAC to Auth...." + hex(mac))
-	hexip = socket.inet_aton(host_ip)
-	# host_ip=ip
-	host_name = "est-pc"
-	host_os = "DrcomGoAway"  # default is 8089D
-	dhcp_server = "0.0.0.0"
-	# mac = 0xE0DB55BAE012
-	# it is a mac in programme and it may crush with other users so I use randMAC to avoid it
-	loginpart()
-
-
-def loginpart():
-	global package_tail
-	while True:
-		try:
-			package_tail = login(username, password, server)
-		except loginException:
-			continue
-		# print('package_tail',package_tail.encode('hex'))
-		keeppart()
-
-
-def keeppart():
-	# empty_socket_buffer()
-	# empty_socket_buffer()
-	keep_alive2(SALT, package_tail, password, server)
-
+    #if not IS_TEST:
+    #    daemon()
+    #    execfile(CONF, globals())
+    log("auth svr: " + server + "\nusername: " + username + "\npassword: " + password + "\nmac: " + str(hex(mac))[:-1])
+    log("bind ip: " + bind_ip)
+    while True:
+        try:
+            package_tail = login(username, password, server)
+        except LoginException:
+            continue
+        log('package_tail',package_tail.encode('hex'))
+        #keep_alive1 is fucking bullshit!
+        empty_socket_buffer()
+        keep_alive1(SALT,package_tail,password,server)
+        keep_alive2(SALT,package_tail,password,server)
 
 if __name__ == "__main__":
-	while True:
-		try_socket()
-		version()
-		# get_randmac()
-		# get_conf()
-		try:
-			main()
-		except:
-			continue
+    main()
