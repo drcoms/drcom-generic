@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #updated on 14 Oct
-#不明作者 原repo的已经失效 本作至2018-11-30仍可用
 
 import socket
 import struct
@@ -572,4 +571,8 @@ def main():
         keep_alive2(SALT,package_tail,password,server)
 
 if __name__ == "__main__":
-    main()
+    while True:
+        try:
+            main()
+        except:
+            continue
