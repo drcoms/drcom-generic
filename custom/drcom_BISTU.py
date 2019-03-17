@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#updated on 14 Oct
+#https://raw.githubusercontent.com/drcoms/drcom-generic/master/latest-wired.py
+#感谢学长的配置文件
 
 import socket
 import struct
@@ -13,14 +14,14 @@ import traceback
 
 # CONFIG
 server = "192.168.211.3"
-username = "" #学号
-password = "" #密码
-host_name = "Thiasap"
-host_os = "Windows10"
+username = ""
+password = ""
+host_name = "LIYUANYUAN"
+host_os = "8089D"
 host_ip = "10.15.143.178"
 PRIMARY_DNS = "211.82.96.1"
 dhcp_server = "211.82.99.88"
-mac = 0x80fa5b42e8a4
+mac = 0xb888e3051680
 CONTROLCHECKSTATUS = '\x20'
 ADAPTERNUM = '\x04'
 KEEP_ALIVE_VERSION = '\xdc\x02'
@@ -75,7 +76,7 @@ s.bind((bind_ip, 61440))
 
 s.settimeout(3)
 SALT = ''
-IS_TEST = False
+IS_TEST = True
 # specified fields based on version
 CONF = "/etc/drcom.conf"
 UNLIMITED_RETRY = True
@@ -554,9 +555,9 @@ def daemon():
         f.write(str(os.getpid()))
         
 def main():
-    #if not IS_TEST:
-    #    daemon()
-    #    execfile(CONF, globals())
+    if not IS_TEST:
+        daemon()
+        execfile(CONF, globals())
     log("auth svr: " + server + "\nusername: " + username + "\npassword: " + password + "\nmac: " + str(hex(mac))[:-1])
     log("bind ip: " + bind_ip)
     while True:
@@ -571,8 +572,4 @@ def main():
         keep_alive2(SALT,package_tail,password,server)
 
 if __name__ == "__main__":
-    while True:
-        try:
-            main()
-        except:
-            continue
+    main()
