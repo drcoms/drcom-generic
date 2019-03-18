@@ -7,6 +7,7 @@ import sys
 import random
 import os
 import hashlib
+import binascii
 
 # CONFIG
 server = '172.30.1.80'
