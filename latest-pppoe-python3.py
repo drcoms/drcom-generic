@@ -325,8 +325,8 @@ def main():
         daemon()
         execfile(CONF, globals())
     log('auth svr: ' + server)
-    log('pppoe_flag: ' + binascii.hexlify(pppoe_flag))
-    log('keep_alive2_flag: ' + binascii.hexlify(keep_alive2_flag))
+    log('pppoe_flag: ' + str(binascii.hexlify(bytes(pppoe_flag,encoding='utf-8')),encoding='utf-8'))
+    log('keep_alive2_flag: ' + str(binascii.hexlify(bytes(keep_alive2_flag, encoding='utf-8')),encoding='utf-8'))
 
     s = Socket(server)
     while True:
