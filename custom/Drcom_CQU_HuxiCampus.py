@@ -11,7 +11,7 @@ import random
 import traceback
 
 # CONFIG
-server = "202.1.1.1"
+server = "10.254.7.4"
 username = "2018xxxx"
 password = "xxxxxx"
 host_name = "GILIGILIEYE"
