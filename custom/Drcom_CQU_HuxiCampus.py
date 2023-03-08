@@ -11,7 +11,7 @@ import random
 import traceback
 
 # CONFIG
-server = "10.254.7.4"
+server = "10.10.8.162"
 username = "2018xxxx"
 password = "xxxxxx"
 host_name = "GILIGILIEYE"
@@ -20,15 +20,15 @@ host_ip = "10.230.59.251"
 PRIMARY_DNS = "202.202.0.33"
 dhcp_server = "10.230.59.2"
 mac = 0xb888e3051680
-CONTROLCHECKSTATUS = '\x00'
-ADAPTERNUM = '\x00'
+CONTROLCHECKSTATUS = '\x20'
+ADAPTERNUM = '\x02'
 KEEP_ALIVE_VERSION = '\xdc\x02'
 '''
 AUTH_VERSION:
     unsigned char ClientVerInfoAndInternetMode;
     unsigned char DogVersion;
 '''
-AUTH_VERSION = '\x2f\x00'
+AUTH_VERSION = '\x31\x00'
 IPDOG = '\x01'
 ror_version = False
 # CONFIG_END
