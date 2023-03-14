@@ -61,7 +61,7 @@ def bind_nic():
     except IOError as e:
         print(nic_name + 'is unacceptable !')
         return '0.0.0.0'
-    finally:
+    except:
         return '0.0.0.0'
 
 if nic_name != '':
