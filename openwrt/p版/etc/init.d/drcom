@@ -1,0 +1,39 @@
+#!/bin/sh /etc/rc.common
+# Copyright (c) 2016, Sui <sun521xiaolei@gmail.com>
+START=90
+
+drcom_up()
+{
+	local enable
+	config_get_bool enable $1 enable
+	if [ $enable ]; then
+	transdrcom
+	drcom &
+	sleep 5
+	echo "Dr.COM Client is started"
+	else
+	stop
+	fi
+}
+
+start()
+{
+	sleep 10
+	rm -rf /etc/config/drcom.conf
+	config_load drcom
+	config_foreach drcom_up drcom
+}
+
+stop()
+{
+	kill -9 `ps | grep drcom | grep python | awk '{print $1}'`
+	echo "Dr.COM Client is stopped"
+}
+
+restart()
+{
+	stop
+	rm -rf /etc/config/drcom.conf
+	config_load drcom
+	config_foreach drcom_up drcom
+}
